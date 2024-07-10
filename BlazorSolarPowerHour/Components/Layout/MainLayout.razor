@@ -1,23 +1,48 @@
 ﻿@inherits LayoutComponentBase
+<TelerikRootComponent>
+    <TelerikAppBar ThemeColor="@(ThemeConstants.AppBar.ThemeColor.Tertiary)">
+        <AppBarSection>
+            <TelerikButton FillMode="flat" Icon="@SvgIcon.Menu" OnClick="@(()=> DrawerRef.ToggleAsync())"></TelerikButton>
+        </AppBarSection>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+        <AppBarSpacer Size="4px" />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <AppBarSection>
+            <h1 class="title">My Telerik UI for Blazor Account</h1>
+        </AppBarSection>
+    </TelerikAppBar>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    <TelerikDrawer Data="@Data" Mode="@DrawerMode.Push" MiniMode="true"
+                   @ref="@DrawerRef">
+        <DrawerContent>
+            <div class="k-m-4">
+                @Body
+            </div>
+        </DrawerContent>
+    </TelerikDrawer>
+</TelerikRootComponent>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    TelerikDrawer<DrawerItem> DrawerRef { get; set; }
+
+    IEnumerable<DrawerItem> Data { get; set; } =
+        new List<DrawerItem>
+                            {
+            new DrawerItem { Text = "Home", Icon = SvgIcon.GridLayout, Url = "/" },
+            new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
+            new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
+                            };
+
+    public class DrawerItem
+    {
+        public string Text { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public ISvgIcon? Icon { get; set; }
+    }
+}
