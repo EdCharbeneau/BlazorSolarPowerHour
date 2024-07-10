@@ -1,21 +1,42 @@
 ﻿@inject MQTTUIService service
 @page "/"
+@using System.Text
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
+@message
+
 @code {
+    string message = "Undefined";
     protected override async Task OnInitializedAsync()
     {
         await service.SetupMQTT(GotMessage);
         await service.SubscribeAsync(); //TODO: unsub later
     }
 
-    private async Task GotMessage(MqttApplicationMessageReceivedEventArgs args)
+    private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
+        if (e.ApplicationMessage.Topic == "solar_assistant/total/battery_power/state")
+        {
+            // update UI with value of the battery's current power
+        }
+        else if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/pv_power/state")
+        {
+            // update UI - solar panel's current power
+        }
+        else if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/grid_power/state")
+        {
+            // update UI - grid's current power
+        }
+        else (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/load_power/state")
+        {
+            // update UI - load's current power
+        }
+
         // DO WORK HERE
-        // StateHasChanged?
+            await InvokeAsync(StateHasChanged);
     }
 
 }
