@@ -6,36 +6,56 @@
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
-<TelerikButton ThemeColor="primary">Hello World</TelerikButton>
+
+<TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px"/>
 
 @message
 
 @code {
     string message = "Undefined";
+
+    bool isSubscribed = false;
+
     protected override async Task OnInitializedAsync()
     {
-        // await service.SetupMQTT(GotMessage);
-        // await service.SubscribeAsync(); //TODO: unsub later
+        await service.SetupMQTT(GotMessage);
+    }
+
+    async Task ToggleConnection(bool value)
+    {
+        isSubscribed = value;
+
+        if(value)
+        {
+            await service.SubscribeAsync();
+        } else
+        {
+            await service.UnsubscribeAsync();
+        }
     }
 
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
-        // if (e.ApplicationMessage.Topic == "solar_assistant/total/battery_power/state")
-        // {
-        //     // update UI with value of the battery's current power
-        // }
-        // else if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/pv_power/state")
-        // {
-        //     // update UI - solar panel's current power
-        // }
-        // else if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/grid_power/state")
-        // {
-        //     // update UI - grid's current power
-        // }
-        // else (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/load_power/state")
-        // {
-        //     // update UI - load's current power
-        // }
+        if (e.ApplicationMessage.Topic == "solar_assistant/total/battery_power/state")
+        {
+            // update UI with value of the battery's current power
+            message = "Got here";
+        }
+        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/pv_power/state")
+        {
+            // update UI - solar panel's current power
+            message = "Got here";
+        }
+        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/grid_power/state")
+        {
+            // update UI - grid's current power
+            message = "Got here";
+        }
+        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/load_power/state")
+        {
+            // update UI - load's current power
+            message = "Got here";
+        }
 
         // DO WORK HERE
             await InvokeAsync(StateHasChanged);
