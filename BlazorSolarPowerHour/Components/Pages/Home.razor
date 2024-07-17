@@ -7,12 +7,20 @@
 
 <h1>Hello, world!</h1>
 
-<TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px"/>
+<TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px" />
 
-@message
+<p>Battery Power: @batteryPower </p>
+<p>PV Power     : @pvPower      </p>
+<p>Grid Power   : @gridPower    </p>
+<p>Load Power   : @loadPower    </p>
+
 
 @code {
     string message = "Undefined";
+    string batteryPower = "";
+    string pvPower = "";
+    string gridPower = "";
+    string loadPower = "";
 
     bool isSubscribed = false;
 
@@ -25,10 +33,11 @@
     {
         isSubscribed = value;
 
-        if(value)
+        if (value)
         {
             await service.SubscribeAsync();
-        } else
+        }
+        else
         {
             await service.UnsubscribeAsync();
         }
@@ -36,29 +45,30 @@
 
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
+        Console.WriteLine(e.ApplicationMessage.Topic);
         if (e.ApplicationMessage.Topic == "solar_assistant/total/battery_power/state")
         {
             // update UI with value of the battery's current power
-            message = "Got here";
+            batteryPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
         }
         if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/pv_power/state")
         {
             // update UI - solar panel's current power
-            message = "Got here";
+            pvPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
         }
         if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/grid_power/state")
         {
             // update UI - grid's current power
-            message = "Got here";
+            gridPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
         }
         if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/load_power/state")
         {
             // update UI - load's current power
-            message = "Got here";
+            loadPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
         }
 
         // DO WORK HERE
-            await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
 }
