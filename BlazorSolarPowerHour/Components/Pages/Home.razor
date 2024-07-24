@@ -6,71 +6,27 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Solar Dashboard</h1>
 
 <TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px" />
 
-<p>Battery Power: @batteryPower </p> Chart or Gauge
-<p>PV Power     : @pvPower      </p>
-<p>Grid Power   : @gridPower    </p>
-<p>Load Power   : @loadPower    </p>
+<TelerikArcGauge>
+    <ArcGaugeCenterLabel>
+        <Template>
+            @(context.Pointers[0].Value)%
+        </Template>
+    </ArcGaugeCenterLabel>
+    <ArcGaugeScales>
+        <ArcGaugeScale Min="0" Max="100">
+        </ArcGaugeScale>
+    </ArcGaugeScales>
+    <ArcGaugePointers>
+        <ArcGaugePointer Value="@batteryPowerValue">
+        </ArcGaugePointer>
+    </ArcGaugePointers>
+</TelerikArcGauge>
 
-@temp.Count
-
-@code {
-    string message = "Undefined";
-    string batteryPower = "";
-    string pvPower = "";
-    string gridPower = "";
-    string loadPower = "";
-    ObservableCollection<string> temp = new();
-    bool isSubscribed = false;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await service.SetupMQTT(GotMessage);
-    }
-
-    async Task ToggleConnection(bool value)
-    {
-        isSubscribed = value;
-
-        if (value)
-        {
-            await service.SubscribeAsync();
-        }
-        else
-        {
-            await service.UnsubscribeAsync();
-        }
-    }
-
-    private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
-    {
-        Console.WriteLine(e.ApplicationMessage.Topic);
-        if (e.ApplicationMessage.Topic == "solar_assistant/total/battery_power/state")
-        {
-            // update UI with value of the battery's current power
-            batteryPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
-        }
-        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/pv_power/state")
-        {
-            // update UI - solar panel's current power
-            pvPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
-        }
-        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/grid_power/state")
-        {
-            // update UI - grid's current power
-            gridPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
-        }
-        if (e.ApplicationMessage.Topic == "solar_assistant/inverter_1/load_power/state")
-        {
-            // update UI - load's current power
-            loadPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
-        }
-        temp.Add(e.ApplicationMessage.Topic);
-        // DO WORK HERE
-        await InvokeAsync(StateHasChanged);
-    }
-
-}
+<p>Battery Power: @batteryPower W </p>
+<p>PV Power     : @pvPower      W</p>
+<p>Grid Power   : @gridPower    W</p>
+<p>Load Power   : @loadPower    W</p>
