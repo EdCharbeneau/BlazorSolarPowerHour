@@ -2,6 +2,7 @@
 @page "/"
 
 @using System.Text
+@using System.Collections.ObjectModel
 
 <PageTitle>Home</PageTitle>
 
@@ -9,11 +10,12 @@
 
 <TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px" />
 
-<p>Battery Power: @batteryPower </p>
+<p>Battery Power: @batteryPower </p> Chart or Gauge
 <p>PV Power     : @pvPower      </p>
 <p>Grid Power   : @gridPower    </p>
 <p>Load Power   : @loadPower    </p>
 
+@temp.Count
 
 @code {
     string message = "Undefined";
@@ -21,7 +23,7 @@
     string pvPower = "";
     string gridPower = "";
     string loadPower = "";
-
+    ObservableCollection<string> temp = new();
     bool isSubscribed = false;
 
     protected override async Task OnInitializedAsync()
@@ -66,7 +68,7 @@
             // update UI - load's current power
             loadPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
         }
-
+        temp.Add(e.ApplicationMessage.Topic);
         // DO WORK HERE
         await InvokeAsync(StateHasChanged);
     }
