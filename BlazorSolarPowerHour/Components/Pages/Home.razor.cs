@@ -10,6 +10,7 @@ public partial class Home
     string message = "Undefined";
     string batteryPower = "";
     double batteryPowerValue;
+    double batterChargeLevelPercent;
     string pvPower = "";
     string gridPower = "";
     string loadPower = "";
@@ -49,12 +50,13 @@ public partial class Home
         if (topicName == TopicName.StateOfCharge_Battery1)
         {
             // update UI with value of the battery's current power
-            batteryPowerValue = double.Parse(e.ApplicationMessage.PayloadSegment.GetTopicValue());
+            batterChargeLevelPercent = double.Parse(e.ApplicationMessage.PayloadSegment.GetTopicValue());
         }
         if (topicName == TopicName.BatteryPower_Total)
         {
             // update UI with value of the battery's current power
             batteryPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
+            batteryPowerValue = double.Parse(batteryPower);
         }
         if (topicName == TopicName.PvPower1_Inverter1)
         {

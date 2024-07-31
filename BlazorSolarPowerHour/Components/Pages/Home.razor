@@ -13,20 +13,72 @@
 <TelerikArcGauge>
     <ArcGaugeCenterLabel>
         <Template>
-            @(context.Pointers[0].Value)%
+            @(context.Pointers[0].Value)% Battery
         </Template>
     </ArcGaugeCenterLabel>
     <ArcGaugeScales>
-        <ArcGaugeScale Min="0" Max="100">
-        </ArcGaugeScale>
+        <ArcGaugeScale Min="0" Max="100" />
     </ArcGaugeScales>
     <ArcGaugePointers>
-        <ArcGaugePointer Value="@batteryPowerValue">
-        </ArcGaugePointer>
+        <ArcGaugePointer Value="@batterChargeLevelPercent" />
     </ArcGaugePointers>
 </TelerikArcGauge>
 
-<p>Battery Power: @batteryPower W </p>
-<p>PV Power     : @pvPower      W</p>
-<p>Grid Power   : @gridPower    W</p>
 <p>Load Power   : @loadPower    W</p>
+<TelerikLinearGauge Transitions="false">
+    <LinearGaugePointers>
+        <LinearGaugePointer Value="@batteryPowerValue" />
+    </LinearGaugePointers>
+    <LinearGaugeScales>
+        <LinearGaugeScale Min="0" Max="1000" MajorUnit="500" MinorUnit="20">
+            <LinearGaugeScaleRanges>
+                <LinearGaugeScaleRange To="1000"
+                                       From="750"
+                                       Color="var(--kendo-color-error-emphasis)">
+                </LinearGaugeScaleRange>
+                <LinearGaugeScaleRange To="750"
+                                       From="500"
+                                       Color="var(--kendo-color-warning)">
+                </LinearGaugeScaleRange>
+            </LinearGaugeScaleRanges>
+        </LinearGaugeScale>
+    </LinearGaugeScales>
+</TelerikLinearGauge>
+
+@* Can be +/-*@
+<p>Battery Power: @batteryPower W </p>
+
+<TelerikLinearGauge Transitions="false">
+    <LinearGaugeScales>
+        <LinearGaugeScale Min="-1000" Max="1000" Vertical="true">
+            <LinearGaugeScaleRanges>
+                <LinearGaugeScaleRange From="0"
+                                       To="1000"
+                                       Color="#00FF62">
+                </LinearGaugeScaleRange>
+                <LinearGaugeScaleRange From="-250"
+                                       To="0"
+                                       Color="#FFE162">
+                </LinearGaugeScaleRange>
+
+                <LinearGaugeScaleRange From="-700"
+                                       To="-250"
+                                       Color="#FF8400">
+                </LinearGaugeScaleRange>
+
+                <LinearGaugeScaleRange From="-1000"
+                                       To="-700"
+                                       Color="#C20000">
+                </LinearGaugeScaleRange>
+            </LinearGaugeScaleRanges>
+        </LinearGaugeScale>
+    </LinearGaugeScales>
+    <LinearGaugePointers>
+        <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
+    </LinearGaugePointers>
+</TelerikLinearGauge>
+
+<p>PV Power     : @pvPower      W</p>
+
+@* Can be +/-*@
+<p>Grid Power   : @gridPower    W</p>

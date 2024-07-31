@@ -29,14 +29,14 @@
 </div>
 
 @code {
-    TelerikDrawer<DrawerItem> DrawerRef { get; set; }
+    TelerikDrawer<DrawerItem> DrawerRef { get; set; } = default!; // set by Blazor on init
 
     IEnumerable<DrawerItem> Data { get; set; } =
         new List<DrawerItem>
                             {
-            new DrawerItem { Text = "Home", Icon = SvgIcon.GridLayout, Url = "/" },
-            new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
-            new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
+            new DrawerItem { Text = "Home", Icon = SvgIcon.Home, Url = "/" },
+            // new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
+            // new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
                             };
 
     public class DrawerItem
