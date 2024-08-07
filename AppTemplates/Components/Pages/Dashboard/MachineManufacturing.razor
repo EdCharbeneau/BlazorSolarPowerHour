@@ -1,0 +1,456 @@
+﻿@page "/"
+
+@using System.Globalization
+@using MachineManufacturingTemplate.Models.Dashboard.MachineManufacturing
+
+<PageTitle>Telerik UI for Blazor | Machine Manufacturing Dashboard Template</PageTitle>
+
+<link rel="stylesheet" href="/dashboard/machine-manufacturing/style.css" />
+
+<style>
+    :root {
+        --machine-manufacturing-appbar-height: 46px;
+    }
+
+    .machine-manufacturing-appbar {
+        z-index: 10000;
+    }
+
+    .machine-manufacturing-textbox {
+        min-width: 360px;
+    }
+
+    .machine-manufacturing-drawer .k-drawer {
+        height: calc(100vh - var(--machine-manufacturing-appbar-height)) !important;
+        top: var(--machine-manufacturing-appbar-height) !important;
+        position: sticky !important;
+        flex: none !important;
+    }
+</style>
+
+<TelerikAppBar PositionMode="AppBarPositionMode.Sticky"
+               ThemeColor="@ThemeConstants.AppBar.ThemeColor.Dark"
+               Class="machine-manufacturing-appbar">
+    <AppBarSection Class="k-flex-basis-0 k-flex-grow k-gap-x-xs-6 k-gap-x-lg-20">
+        <a href="#" class="k-d-flex k-gap-1.5">
+            <img src="@LogoSrc" alt="Logo" />
+            <img src="@LogoTextSrc" alt="Logo Text" class="k-d-xs-none k-d-lg-inline" />
+        </a>
+        <TelerikButton OnClick="@ToggleDrawer" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="SvgIcon.Menu" Title="Menu"></TelerikButton>
+    </AppBarSection>
+    <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-center">
+        <TelerikTextBox Placeholder="Input Value" ShowPrefixSeparator="false" Class="machine-manufacturing-textbox k-d-xs-none k-d-lg-flex">
+            <TextBoxPrefixTemplate>
+                <TelerikSvgIcon Icon="@SvgIcon.Search" />
+            </TextBoxPrefixTemplate>
+        </TelerikTextBox>
+        <TelerikButton Title="Search" Class="k-d-xs-inline-flex k-d-lg-none" FillMode="@ThemeConstants.Button.FillMode.Flat" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary" Icon="SvgIcon.Search"></TelerikButton>
+    </AppBarSection>
+    <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+        <div class="k-badge-container">
+            <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
+            <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
+                          Position="@BadgePosition.Inside"
+                          HorizontalAlign="@BadgeHorizontalAlign.End"
+                          VerticalAlign="@BadgeVerticalAlign.Top"
+                          ThemeColor="@ThemeConstants.Badge.ThemeColor.Primary">
+            </TelerikBadge>
+        </div>
+        <span class="k-appbar-separator k-border-border"></span>
+        <TelerikDropDownButton Icon="@SvgIcon.User" ShowArrowButton="false" FillMode="@ThemeConstants.Button.FillMode.Flat">
+            <DropDownButtonContent>
+                Hi, admin!
+            </DropDownButtonContent>
+        </TelerikDropDownButton>
+    </AppBarSection>
+</TelerikAppBar>
+
+<TelerikDrawer Data="@DrawerItems"
+               Mode="@DrawerMode.Push"
+               @ref="@DrawerRef"
+               @bind-Expanded="@DrawerExpanded"
+               @bind-SelectedItem="@SelectedDrawerItem"
+               Class="machine-manufacturing-drawer"
+               Width="248px">
+    <DrawerContent>
+        <h1 class="k-h1 k-py-8 k-px-10 !k-mb-0 k-overflow-hidden k-text-ellipsis">Dashboard</h1>
+        <div class="k-d-grid k-grid-cols-xs-1 k-grid-cols-md-3 k-grid-cols-lg-4 k-gap-4 k-px-lg-10 k-px-xs-4">
+            <div class="k-d-grid k-grid-cols-xs-1 k-grid-cols-md-8 k-grid-cols-lg-12 k-gap-4 k-col-span-md-2 k-col-span-lg-3">
+                @* CMPCTCARD-4 *@
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltUp, ThemeConstants.SvgIcon.ThemeColor.Success, "7%", "Quantity improvement", "83766")
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltDown, ThemeConstants.SvgIcon.ThemeColor.Error, "3%", "Manufacturing cost", "83766")
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltUp, ThemeConstants.SvgIcon.ThemeColor.Success, "7%", "Efficiency", "83766")
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltUp, ThemeConstants.SvgIcon.ThemeColor.Success, "7%", "Percentage", "83766")
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltDown, ThemeConstants.SvgIcon.ThemeColor.Error, "3%", "Throughput", "83766")
+                @CompactCardFragment("k-col-span-xs-full k-col-span-md-4 k-col-span-lg-4", SvgIcon.CaretAltUp, ThemeConstants.SvgIcon.ThemeColor.Success, "7%", "Downtime", "83766")
+                @* DASHBRDCARD-11 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-12 k-overflow-x-auto k-d-flex k-flex-col k-border k-border-solid k-border-border k-bg-surface-alt k-overflow-x-auto k-rounded-none">
+                    <div class="k-d-flex k-justify-content-between k-align-items-center k-py-3 k-px-4 k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Production Volume</span>
+                        <TelerikMultiSelect Width="253px"
+                                            Data="@MultiSelectData"
+                                            AriaLabel="Filters"
+                                            @bind-Value="@MultiSelectSelectedItems">
+
+                        </TelerikMultiSelect>
+                    </div>
+                    <div class="k-flex-1 k-p-4">
+                        <TelerikChart Width="100%" Height="410px">
+                            <ChartChartArea Background="@("var(--kendo-color-surface-alt)")"></ChartChartArea>
+                            <ChartSeriesItems>
+                                <ChartSeries Type="@ChartSeriesType.Column" Name="Machine 1" Spacing="0" Data="@MachineOneSerriesData">
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Column" Name="Machine 2" Data="@MachineTwoSeriesData">
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Column" Name="Machine 4" Data="@MachineFourSeriesData">
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Column" Name="Machine 8" Data="@MachineEigthSeriesData">
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                            </ChartSeriesItems>
+                            <ChartCategoryAxes>
+                                <ChartCategoryAxis Categories="@ProductionVolumeXAxisItems"></ChartCategoryAxis>
+                            </ChartCategoryAxes>
+                            <ChartValueAxes>
+                                <ChartValueAxis Min="0" Max="8500" MajorUnit="500" />
+                            </ChartValueAxes>
+                            <ChartLegend Position="@ChartLegendPosition.Bottom" Align="@ChartLegendAlign.Start" Visible="true" />
+                        </TelerikChart>
+                    </div>
+                </div>
+                @* DASHBRDCARD-3 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-4 k-d-flex k-flex-column k-gap-y-4 k-p-4 k-border k-border-solid k-border-border k-overflow-x-auto k-rounded-none k-bg-surface-alt">
+                    <div class="k-d-flex k-flex-row k-align-items-center k-justify-content-between k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Staff</span>
+                        <TelerikDropDownList Width="164px" TItem="string" TValue="string" DefaultText="All Departments" AriaLabel="Filters" />
+                    </div>
+                    <div class="k-d-grid k-grid-cols-2 !k-bg-transparent k-overflow-x-auto">
+                        @StaffFragment(AvatarImage1Src, "Shannon Miller", "Chief Response Coordinator")
+                        @StaffFragment(AvatarImage2Src, "Brandon Hirthe", "Senior Branding Engineer")
+                        @StaffFragment(AvatarImage3Src, "Stella Fadel", "Senior Assurance Engineer")
+                        @StaffFragment(AvatarImage4Src, "Earnest Anderson", "Senior Optimization Specialist")
+                        @StaffFragment(AvatarImage5Src, "Travis Kemmer", "Dynamic Quality Coordinator")
+                        @StaffFragment(AvatarImage6Src, "Velma Strosin", "Regional Assurance Supervisor")
+                    </div>
+                    <div class="k-d-flex k-flex-row">
+                        <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">View all</TelerikButton>
+                    </div>
+                </div>
+                @* DASHBRDCARD-11 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-8 k-d-flex k-flex-col k-p-4 k-gap-4 k-border k-border-solid k-border-border k-bg-surface-alt k-overflow-x-auto k-rounded-none">
+                    <div class="k-d-flex k-justify-content-between k-align-items-center k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Quality issues</span>
+                        <TelerikDatePicker Rounded="none" @bind-Value="QualityIssuesDatePickerValue" Width="164px" ShowClearButton="true" AriaLabel="Date" />
+                    </div>
+                    <div class="k-flex-1">
+                        <TelerikChart Height="257px" Width="100%">
+                            <ChartChartArea Background="@("var(--kendo-color-surface-alt)")"></ChartChartArea>
+                            <ChartLegend Visible="false"></ChartLegend>
+                            <ChartSeriesItems>
+                                <ChartSeries Type="ChartSeriesType.Donut"
+                                            Data="@QalityIssuesData"
+                                            Field="@nameof(ChartSeriesModel.Value)"
+                                            CategoryField="@nameof(ChartSeriesModel.Name)"
+                                            HoleSize="50">
+                                    <ChartSeriesLabels Position="ChartSeriesLabelsPosition.OutsideEnd"
+                                                    Visible="true"
+                                                    Background="transparent"
+                                                    Template="#= dataItem.Name #">
+                                    </ChartSeriesLabels>
+                                </ChartSeries>
+                            </ChartSeriesItems>
+                        </TelerikChart>
+                    </div>
+                </div>
+                @* DASHBRDCARD-11 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-full k-d-flex k-flex-col k-border k-border-solid k-border-border k-bg-surface-alt k-overflow-x-auto k-rounded-none">
+                    <div class="k-d-flex k-justify-content-between k-align-items-center k-py-3 k-px-4 k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Defect Rate</span>
+                        <TelerikDatePicker @bind-Value="@DefectRateDatePickerValue" Width="164px" Rounded="none" ShowClearButton="true" Format="yyyy" AriaLabel="Date" />
+                    </div>
+                    <div class="k-flex-1 k-p-4">
+                        <TelerikChart Height="363px" Width="100%">
+                            <ChartChartArea Background="@("var(--kendo-color-surface-alt)")"></ChartChartArea>
+                            <ChartSeriesItems>
+                                <ChartSeries Type="ChartSeriesType.Line" Name="Severe" Data="@SevereDefectRateData">
+                                    <ChartSeriesMarkers Background="@("var(--kendo-color-surface-alt)")"></ChartSeriesMarkers>
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Line" Name="Major" Data="@MajorDefectRateData">
+                                    <ChartSeriesMarkers Background="@("var(--kendo-color-surface-alt)")"></ChartSeriesMarkers>
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Line" Name="Average" Data="@AverageDefectRateData">
+                                    <ChartSeriesMarkers Background="@("var(--kendo-color-surface-alt)")"></ChartSeriesMarkers>
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                                <ChartSeries Type="ChartSeriesType.Line" Name="Minor" Data="@MinorDefectRateData">
+                                    <ChartSeriesMarkers Background="@("var(--kendo-color-surface-alt)")"></ChartSeriesMarkers>
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                </ChartSeries>
+                            </ChartSeriesItems>
+                            <ChartValueAxes>
+                                <ChartValueAxis Min="0" Max="100" MajorUnit="10" />
+                            </ChartValueAxes>
+                            <ChartCategoryAxes>
+                                <ChartCategoryAxis Categories="@DefectRateXAxisItems">
+                                    <ChartCategoryAxisLabels>
+                                        <ChartCategoryAxisLabelsRotation Angle="-90" />
+                                    </ChartCategoryAxisLabels>
+                                </ChartCategoryAxis>
+                            </ChartCategoryAxes>
+                            <ChartLegend Visible="true" Position="@ChartLegendPosition.Bottom"></ChartLegend>
+                        </TelerikChart>
+                    </div>
+                </div>
+                @* DASHBRDCARD-8 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-7 k-d-flex k-flex-column k-border k-border-solid k-border-border k-overflow-x-auto k-rounded-none k-bg-surface-alt">
+                    <div class="k-d-flex k-px-4 k-py-3 k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Inventory</span>
+                        <span class="k-spacer"></span>
+                        <TelerikDatePicker Rounded="none" @bind-Value="@InventoryDatePickerValue" Width="164px" ShowClearButton="true" AriaLabel="Date" />
+                    </div>
+                    <div class="k-p-4">
+
+                        <TelerikGrid Data="@GridData" Class="k-grid-no-scrollbar">
+                            <GridColumns>
+                                <GridColumn Title="Item #" Field="@nameof(GridItemModel.ItemNumber)" />
+                                <GridColumn Title="Availability" Field="@nameof(GridItemModel.Availability)">
+                                    <Template>
+                                        @{
+                                            var item = context as GridItemModel;
+                                            var availability = item.Availability;
+                                            var themeColor = availability switch
+                                            {
+                                            "Out of stock" => ThemeConstants.Badge.ThemeColor.Error,
+                                            "In stock" => ThemeConstants.Badge.ThemeColor.Success,
+                                            "Low in stock" => ThemeConstants.Badge.ThemeColor.Warning,
+                                            _ => null
+                                            };
+                                        }
+                                        <div class="k-badge-container">
+                                            <span class="k-badge k-badge-md k-badge-solid k-badge-solid-@themeColor k-rounded-full">@availability</span>
+                                        </div>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Title="Available" Field="@nameof(GridItemModel.Available)" />
+                                <GridColumn Title="Booked" Field="@nameof(GridItemModel.Booked)" />
+                                <GridColumn Title="Min Qty" Field="@nameof(GridItemModel.MinQuantity)" />
+                                <GridColumn Title="Cost" Field="@nameof(GridItemModel.Cost)" />
+                            </GridColumns>
+                        </TelerikGrid>
+                    </div>
+                    <div class="k-d-flex k-px-4 k-py-3">
+                        <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">View all items</TelerikButton>
+                    </div>
+                </div>
+                @* DASHBRDCARD-11 *@
+                <div class="k-col-span-xs-full k-col-span-md-full k-col-span-lg-5 k-d-flex k-flex-col k-border k-border-solid k-border-border k-bg-surface-alt k-overflow-x-auto k-rounded-none">
+                    <div class="k-d-flex k-justify-content-between k-align-items-center k-py-3 k-px-4 k-flex-wrap k-gap-y-2">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Satisfaction Score</span>
+                        <TelerikDropDownList Rounded="none" Width="164px" DefaultText="Q3 2023" TItem="string" TValue="string" AriaLabel="Filters" />
+                    </div>
+                    <div class="k-flex-1 k-p-4">
+                        <TelerikChart Width="100%" Height="331px">
+                            <ChartChartArea Background="@("var(--kendo-color-surface-alt)")"></ChartChartArea>
+                            <ChartSeriesItems>
+                                <ChartSeries Type="ChartSeriesType.Pie"
+                                            Padding="10"
+                                            Data="@SatisfactionScoreData"
+                                            Field="@nameof(ChartSeriesModel.Value)"
+                                            CategoryField="@nameof(ChartSeriesModel.Name)">
+                                    <ChartSeriesLegendItem Type="@ChartLegendItemType.Line" />
+                                    <ChartSeriesLabels Visible="true" Background="transparent" Position="@ChartSeriesLabelsPosition.Center"></ChartSeriesLabels>
+                                    <ChartSeriesBorder Color="@("var(--kendo-color-surface-alt)")" Width="3" />
+                                </ChartSeries>
+                            </ChartSeriesItems>
+                            <ChartLegend Position="ChartLegendPosition.Bottom" />
+                        </TelerikChart>
+                    </div>
+                </div>
+            </div>
+            <div class="k-col-span-1 k-row-span-full k-d-flex k-flex-column">
+            @* DASHBRDCARD-6 *@
+                <div class="k-mb-4 k-d-flex k-flex-column k-border k-border-solid k-border-border k-rounded-none k-bg-surface-alt k-gap-4 k-p-4 k-overflow-x-auto">
+                    <div class="k-d-flex k-flex-row k-flex-wrap k-gap-y-2 k-align-items-center">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Alerts</span>
+                        <span class="k-spacer"></span>
+                        <TelerikDatePicker @bind-Value="@AlertsDatePickerValue" Rounded="none" Width="164px" ShowClearButton="true" AriaLabel="Date" />
+                    </div>
+                    <div class="k-d-flex k-flex-1 k-flex-column k-gap-y-2">
+                        @AlertFragment(SvgIcon.X, ThemeConstants.Avatar.ThemeColor.Error, "Breakdown", "Machine 1 has a breakdown", resolveButton: true, snoozeButton: true, closeButton: false)
+                        @AlertFragment(SvgIcon.Check, ThemeConstants.Avatar.ThemeColor.Success, "Inspection completed", "The inspection of Machine 2 has be...", resolveButton: false, snoozeButton: false, closeButton: true)
+                        @AlertFragment(SvgIcon.Calendar, ThemeConstants.Avatar.ThemeColor.Info, "Upcoming inspection", "Machine 6 is about to be inspected...", resolveButton: false, snoozeButton: true, closeButton: false)
+                        @AlertFragment(SvgIcon.Check, ThemeConstants.Avatar.ThemeColor.Success, "Issue solved", "Successfully resolved the issue", resolveButton: false, snoozeButton: false, closeButton: true)
+                        @AlertFragment(SvgIcon.Calendar, ThemeConstants.Avatar.ThemeColor.Info, "Upcoming inspection", "Machine 6 is about to be inspected...", resolveButton: false, snoozeButton: true, closeButton: false)
+                    </div>
+                    <div class="k-d-flex k-flex-row">
+                        <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">See all alerts</TelerikButton>
+                    </div>
+                </div>
+                @* DASHBRDCARD-5 *@
+                <div class="k-flex-1 k-d-flex k-flex-column k-gap-4 k-p-4 k-border k-border-solid k-border-border k-rounded-none k-bg-surface-alt k-overflow-x-auto">
+                    <div class="k-d-flex k-flex-row">
+                        <span class="k-font-size-lg k-font-family-monospace k-font-weight-medium">Machines</span>
+                    </div>
+                    <div class="k-d-flex k-flex-1 k-flex-column k-gap-y-4">
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Success, "Machine 1", "32 months", "Aug 22 2023", "Apr 25 2024", "Running")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Warning, "Machine 2", "16 months", "Aug 22 2023", "Apr 25 2024", "Under inspection")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Error, "Machine 3", "65 months", "Aug 22 2023", "Apr 25 2024", "Breakdown")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Info, "Machine 4", "0,4 months", "Aug 22 2023", "Apr 25 2024", "Under trial")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Success, "Machine 5", "75 months", "Aug 22 2023", "Apr 25 2024", "Running")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Success, "Machine 6", "75 months", "Aug 22 2023", "Apr 25 2024", "Running")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Success, "Machine 7", "75 months", "Aug 22 2023", "Apr 25 2024", "Running")
+                        @MachineFragment(ThemeConstants.Badge.ThemeColor.Success, "Machine 8", "75 months", "Aug 22 2023", "Apr 25 2024", "Running")
+                    </div>
+                    <div class="k-d-flex k-flex-row">
+                        <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">See all machines</TelerikButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="!k-bg-surface !k-color-subtle k-mt-14 k-bg-light k-py-6 k-px-2 k-px-sm-4.5 k-px-md-6 k-px-lg-4 k-px-xl-7.5">
+            <p class="!k-mb-0">Copyright &#169; 2024 Progress Software. All rights reserved.</p>
+        </div>
+    </DrawerContent>
+</TelerikDrawer>
+
+@code{
+
+    private RenderFragment CompactCardFragment(
+        string positionClass,
+        ISvgIcon icon,
+        string themeColor,
+        string measure,
+        string title,
+        string producedUnits) => __builder =>
+    {
+        <div class="@positionClass k-overflow-x-auto k-d-flex k-flex-col k-rounded-none k-border k-border-solid k-border-border k-bg-surface-alt">
+            <div class="k-d-flex k-flex-row k-align-items-center k-justify-content-center k-gap-x-2 k-px-2 k-pt-2 k-pb-0">
+                <div class="k-d-flex k-flex-row k-align-items-center">
+                    <TelerikSvgIcon Icon="@icon"
+                                    ThemeColor="@themeColor"
+                                    Size="@ThemeConstants.SvgIcon.Size.ExtraLarge" />
+                    <h3 class="k-h3 !k-mb-0">@measure</h3>
+                </div>
+                <span class="k-font-size-sm k-color-subtle">@title</span>
+            </div>
+            <div class="k-d-flex k-align-items-center k-justify-content-center k-p-2 k-gap-x-2">
+                <div class="k-d-flex k-flex-column k-align-items-end">
+                    <span class="k-font-size-lg k-font-weight-bold">@producedUnits</span>
+                    <span class="k-color-subtle">produced units</span>
+                </div>
+                <span class="k-separator k-separator-vertical k-border-border"></span>
+                <div class="k-d-flex k-flex-column k-align-items-start">
+                    <span class="k-font-size-lg k-font-weight-bold">@producedUnits</span>
+                    <span class="k-color-subtle">produced units</span>
+                </div>
+            </div>
+        </div>
+    };
+
+    private RenderFragment AlertFragment(
+        ISvgIcon icon,
+        string themeColor,
+        string alert,
+        string description,
+        bool resolveButton,
+        bool snoozeButton,
+        bool closeButton) => __builder =>
+    {
+        <div class="k-d-flex k-flex-column k-gap-2 k-p-2 k-border k-border-solid k-border-surface-alt k-rounded-none">
+            <div class="k-d-flex k-flex-row k-align-items-center k-gap-x-2">
+                <TelerikAvatar ThemeColor="@themeColor" Type="@AvatarType.Icon">
+                    <TelerikSvgIcon Icon="@icon" />
+                </TelerikAvatar>
+                <div class="k-d-flex k-flex-col k-overflow-hidden">
+                    <span class="k-font-size-lg">@alert</span>
+                    <span class="k-color-subtle k-font-size-sm k-text-ellipsis">@description</span>
+                </div>
+            </div>
+            <div class="k-d-flex">
+                @if (resolveButton)
+                {
+                    <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">Resolve</TelerikButton>
+                }
+                @if (snoozeButton)
+                {
+                    <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">Snooze</TelerikButton>
+                }
+                @if (closeButton)
+                {
+                    <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">Close</TelerikButton>
+                }
+            </div>
+        </div>
+    };
+
+    private RenderFragment MachineFragment(
+        string themeColor,
+        string machine,
+        string age,
+        string lastInspection,
+        string nextInspection,
+        string status) => __builder =>
+    {
+        <div class="k-border k-border-solid k-border-border k-rounded-none k-bg-surface">
+            <div class="k-d-flex k-gap-x-2 k-p-2 k-justify-content-between">
+                <div class="k-d-flex k-flex-col">
+                    <span class="k-font-size-lg">@machine</span>
+                </div>
+                <div class="k-badge-container">
+                    <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
+                                  ThemeColor="@themeColor"
+                                  VerticalAlign="@BadgeVerticalAlign.Top"
+                                  HorizontalAlign="@BadgeHorizontalAlign.End"
+                                  Position="@BadgePosition.Inside">
+                        @status
+                    </TelerikBadge>
+                </div>
+            </div>
+            <div class="k-d-flex k-flex-col k-p-2 k-gap-y-2">
+                <div class="k-d-flex k-flex-col">
+                    <span class="k-color-subtle">
+                        Age:
+                        <span class="k-color-on-app-surface">@age</span>
+                    </span>
+                    <span class="k-color-subtle">
+                        Last inspection:
+                        <span class="k-color-on-app-surface">@lastInspection</span>
+                    </span>
+                    <span class="k-color-subtle">
+                        Next inspection:
+                        <span class="k-color-on-app-surface">@nextInspection</span>
+                    </span>
+                </div>
+                <div class="k-d-flex k-flex-row">
+                    <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat">See all details</TelerikButton>
+                </div>
+            </div>
+        </div>
+    };
+
+    private RenderFragment StaffFragment(string avatarUrl, string name, string position) => __builder =>
+    {
+        <div class="k-d-flex k-flex-col k-align-items-center k-p-2 k-gap-2">
+            <div class="k-badge-container">
+                <TelerikAvatar Type="@AvatarType.Image">
+                    <img src="@avatarUrl" alt="Avatar Image" />
+                </TelerikAvatar>
+                <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Medium"
+                              Position="@BadgePosition.Inside"
+                              VerticalAlign="@BadgeVerticalAlign.Bottom"
+                              HorizontalAlign="@BadgeHorizontalAlign.End"
+                              ThemeColor="@ThemeConstants.Badge.ThemeColor.Success">
+                </TelerikBadge>
+            </div>
+            <div class="k-d-flex k-flex-col k-align-items-center k-text-center">
+                <span class="k-font-size-sm">@name</span>
+                <span class="k-font-size-xs k-color-subtle">@position</span>
+            </div>
+        </div>
+    };
+}
