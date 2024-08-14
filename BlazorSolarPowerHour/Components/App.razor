@@ -5,15 +5,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <link rel="stylesheet" href="_content/Telerik.UI.for.Blazor/css/kendo-theme-default/all.css" />
-    <link rel="stylesheet" href="app.css" />
+    <link href="common/favicon.ico" rel="icon" type="image/x-icon" />
     <link rel="stylesheet" href="BlazorSolarPowerHour.styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@progress/kendo-theme-default@9.0.0" />
+    @*<link rel="stylesheet" href="_content/Telerik.UI.for.Blazor/css/kendo-theme-default/all.css" />*@
+    <link rel="stylesheet" href="https://unpkg.com/@@progress/kendo-theme-utils@9.0.0" />
+    <link rel="stylesheet" href="/common/reset.css" />
+    <link rel="stylesheet" href="/dashboard/machine-manufacturing/style.css" />
+    <link rel="stylesheet" href="app.css" />
+
     <link rel="icon" type="image/png" href="favicon.png" />
     <script src="_content/Telerik.UI.for.Blazor/js/telerik-blazor.js"></script>
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body class="k-m-0">
+<body class="k-body">
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 </body>

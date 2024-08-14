@@ -1,6 +1,7 @@
 using BlazorSolarPowerHour.Components.Services;
 using MQTTnet.Client;
 using System.Collections.ObjectModel;
+using Telerik.Blazor.Components;
 using static BlazorSolarPowerHour.Components.Services.TopicNameHelper;
 
 namespace BlazorSolarPowerHour.Components.Pages;
@@ -17,7 +18,12 @@ public partial class Home
     ObservableCollection<string> LiveMessages = new();
     bool isSubscribed = false;
     DateTime lastRender = DateTime.Now;
-
+    TelerikArcGauge? BatteryLevelGauge { get; set; }
+    TelerikLinearGauge? BatteryPowerGauge { get; set; }
+    void ItemResize() {
+        BatteryLevelGauge?.Refresh();
+        BatteryPowerGauge?.Refresh();
+    }
     protected override async Task OnInitializedAsync()
     {
         await service.SetupMQTT(GotMessage);

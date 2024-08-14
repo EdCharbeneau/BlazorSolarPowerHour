@@ -1,0 +1,3 @@
+.symbol {
+    font-size: calc(var(--kendo-font-size-xl, 20px) + 10px);
+}

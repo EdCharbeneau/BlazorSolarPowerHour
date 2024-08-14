@@ -1,0 +1,21 @@
+﻿<div class="k-d-flex k-border k-border-solid k-border-border k-bg-surface-alt k-align-items-center k-overflow-x-auto k-px-4 k-py-3 k-gap-2 k-rounded-lg">
+    <span class="symbol">@Symbol</span>
+    <div class="k-d-flex k-flex-col">
+        <span class="k-font-size-xl">@Value @Unit</span>
+        <span class="k-font-size-sm k-color-subtle">@Text</span>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Symbol { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Unit { get; set; } = string.Empty;
+}

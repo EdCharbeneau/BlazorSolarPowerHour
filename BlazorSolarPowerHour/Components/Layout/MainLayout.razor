@@ -1,18 +1,60 @@
 ﻿@inherits LayoutComponentBase
 <TelerikRootComponent>
-    <TelerikAppBar ThemeColor="@(ThemeConstants.AppBar.ThemeColor.Tertiary)">
-        <AppBarSection>
-            <TelerikButton FillMode="flat" Icon="@SvgIcon.Menu" OnClick="@(()=> DrawerRef.ToggleAsync())"></TelerikButton>
+    <div class="k-body">
+
+    <TelerikAppBar PositionMode="AppBarPositionMode.Sticky"
+                   ThemeColor="@ThemeConstants.AppBar.ThemeColor.Dark"
+                   Class="machine-manufacturing-appbar">
+        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-gap-x-xs-6 k-gap-x-lg-20">
+            <a href="#" class="k-d-flex k-gap-1.5">
+                <img src="@LogoSrc" alt="Logo" />
+                <img src="@LogoTextSrc" alt="Logo Text" class="k-d-xs-none k-d-lg-inline" />
+            </a>
+            <TelerikButton OnClick="@ToggleDrawer" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="SvgIcon.Menu" Title="Menu"></TelerikButton>
         </AppBarSection>
-
-        <AppBarSpacer Size="4px" />
-
-        <AppBarSection>
-            <h1 class="title">My Telerik UI for Blazor Account</h1>
+        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-center">
+            <TelerikTextBox Placeholder="Input Value" ShowPrefixSeparator="false" Class="machine-manufacturing-textbox k-d-xs-none k-d-lg-flex">
+                <TextBoxPrefixTemplate>
+                    <TelerikSvgIcon Icon="@SvgIcon.Search" />
+                </TextBoxPrefixTemplate>
+            </TelerikTextBox>
+            <TelerikButton Title="Search" Class="k-d-xs-inline-flex k-d-lg-none" FillMode="@ThemeConstants.Button.FillMode.Flat" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary" Icon="SvgIcon.Search"></TelerikButton>
+        </AppBarSection>
+        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+            <div class="k-badge-container">
+                <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
+                <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
+                              Position="@BadgePosition.Inside"
+                              HorizontalAlign="@BadgeHorizontalAlign.End"
+                              VerticalAlign="@BadgeVerticalAlign.Top"
+                              ThemeColor="@ThemeConstants.Badge.ThemeColor.Primary">
+                </TelerikBadge>
+            </div>
+            <span class="k-appbar-separator k-border-border"></span>
+            <TelerikDropDownButton Icon="@SvgIcon.User" ShowArrowButton="false" FillMode="@ThemeConstants.Button.FillMode.Flat">
+                <DropDownButtonContent>
+                    Hi, admin!
+                </DropDownButtonContent>
+            </TelerikDropDownButton>
         </AppBarSection>
     </TelerikAppBar>
 
-    <TelerikDrawer Data="@Data" Mode="@DrawerMode.Push" MiniMode="true"
+    <TelerikDrawer Data="@DrawerItems"
+                   Mode="@DrawerMode.Push"
+                   MiniMode="true"
+                   @ref="@DrawerRef"
+                   @bind-Expanded="@DrawerExpanded"
+                   @bind-SelectedItem="@SelectedDrawerItem"
+                   Class="machine-manufacturing-drawer"
+                   Width="248px">
+        <DrawerContent>
+            <div class="k-m-4">
+                @Body
+            </div>
+        </DrawerContent>
+    </TelerikDrawer>
+
+@*     <TelerikDrawer Data="@Data" Mode="@DrawerMode.Push" MiniMode="true"
                    @ref="@DrawerRef">
         <DrawerContent>
             <div class="k-m-4">
@@ -20,7 +62,10 @@
             </div>
         </DrawerContent>
     </TelerikDrawer>
-</TelerikRootComponent>
+*@
+    </div>
+
+</TelerikRootComponent> 
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
@@ -29,15 +74,26 @@
 </div>
 
 @code {
+    private string LogoSrc = "/dashboard/machine-manufacturing/logo.svg";
+    private string LogoTextSrc = "/dashboard/machine-manufacturing/logo_text.svg";
+    private async Task ToggleDrawer() => await DrawerRef.ToggleAsync();
+    private bool DrawerExpanded { get; set; } = true;
+    private DrawerItem? _selectedDrawerItem;
+    private DrawerItem SelectedDrawerItem
+    {
+        get => _selectedDrawerItem ?? DrawerItems.FirstOrDefault(new DrawerItem());
+        set => _selectedDrawerItem = value;
+    }
+
     TelerikDrawer<DrawerItem> DrawerRef { get; set; } = default!; // set by Blazor on init
 
-    IEnumerable<DrawerItem> Data { get; set; } =
+    IEnumerable<DrawerItem> DrawerItems { get; set; } =
         new List<DrawerItem>
-                            {
+                                {
             new DrawerItem { Text = "Home", Icon = SvgIcon.Home, Url = "/" },
-            // new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
-            // new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
-                            };
+                // new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
+                // new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
+                                };
 
     public class DrawerItem
     {

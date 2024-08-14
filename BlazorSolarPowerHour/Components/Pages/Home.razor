@@ -3,6 +3,7 @@
 
 @using System.Text
 @using System.Collections.ObjectModel
+@using BlazorSolarPowerHour.Components.DashboardComponents
 
 <PageTitle>Home</PageTitle>
 
@@ -10,75 +11,114 @@
 
 <TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px" />
 
-<TelerikArcGauge>
-    <ArcGaugeCenterLabel>
-        <Template>
-            @(context.Pointers[0].Value)% Battery
-        </Template>
-    </ArcGaugeCenterLabel>
-    <ArcGaugeScales>
-        <ArcGaugeScale Min="0" Max="100" />
-    </ArcGaugeScales>
-    <ArcGaugePointers>
-        <ArcGaugePointer Value="@batterChargeLevelPercent" />
-    </ArcGaugePointers>
-</TelerikArcGauge>
+<TelerikTileLayout Columns="4"
+                   Reorderable="true"
+                   Resizable="true"
+                   OnResize="@ItemResize">
+    <TileLayoutItems>
+        <TileLayoutItem HeaderText="Battery Power">
+            <Content>
+                <TelerikArcGauge @ref="BatteryLevelGauge">
+                    <ArcGaugeCenterLabel>
+                        <Template>
+                            @(context.Pointers[0].Value)% Battery
+                        </Template>
+                    </ArcGaugeCenterLabel>
+                    <ArcGaugeScales>
+                        <ArcGaugeScale Min="0" Max="100" />
+                    </ArcGaugeScales>
+                    <ArcGaugePointers>
+                        <ArcGaugePointer Value="@batterChargeLevelPercent" />
+                    </ArcGaugePointers>
+                </TelerikArcGauge>
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                <CompactCard Value="@loadPower" Symbol="💡" Text="Load Power" Unit="W" />
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                @* Can be +/-*@
+                <CompactCard Value="@batteryPower" Symbol="🔋" Text="Battery Power" Unit="W" />
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                <TelerikLinearGauge @ref="BatteryPowerGauge" Transitions="false" >
+                    <LinearGaugePointers>
+                        <LinearGaugePointer Value="@batteryPowerValue" />
+                    </LinearGaugePointers>
+                    <LinearGaugeScales>
+                        <LinearGaugeScale Vertical="false" Min="0" Max="1000" MajorUnit="500" MinorUnit="20">
+                            <LinearGaugeScaleRanges>
+                                <LinearGaugeScaleRange To="1000"
+                                                       From="750"
+                                                       Color="var(--kendo-color-error-emphasis)">
+                                </LinearGaugeScaleRange>
+                                <LinearGaugeScaleRange To="750"
+                                                       From="500"
+                                                       Color="var(--kendo-color-warning)">
+                                </LinearGaugeScaleRange>
+                            </LinearGaugeScaleRanges>
+                        </LinearGaugeScale>
+                    </LinearGaugeScales>
+                </TelerikLinearGauge>
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                <TelerikLinearGauge Transitions="false">
+                    <LinearGaugeScales>
+                        <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
+                            <LinearGaugeScaleRanges>
+                                <LinearGaugeScaleRange From="0"
+                                                       To="1000"
+                                                       Color="#00FF62">
+                                </LinearGaugeScaleRange>
+                                <LinearGaugeScaleRange From="-250"
+                                                       To="0"
+                                                       Color="#FFE162">
+                                </LinearGaugeScaleRange>
 
-<p>Load Power   : @loadPower    W</p>
-<TelerikLinearGauge Transitions="false">
-    <LinearGaugePointers>
-        <LinearGaugePointer Value="@batteryPowerValue" />
-    </LinearGaugePointers>
-    <LinearGaugeScales>
-        <LinearGaugeScale Min="0" Max="1000" MajorUnit="500" MinorUnit="20">
-            <LinearGaugeScaleRanges>
-                <LinearGaugeScaleRange To="1000"
-                                       From="750"
-                                       Color="var(--kendo-color-error-emphasis)">
-                </LinearGaugeScaleRange>
-                <LinearGaugeScaleRange To="750"
-                                       From="500"
-                                       Color="var(--kendo-color-warning)">
-                </LinearGaugeScaleRange>
-            </LinearGaugeScaleRanges>
-        </LinearGaugeScale>
-    </LinearGaugeScales>
-</TelerikLinearGauge>
+                                <LinearGaugeScaleRange From="-700"
+                                                       To="-250"
+                                                       Color="#FF8400">
+                                </LinearGaugeScaleRange>
 
-@* Can be +/-*@
-<p>Battery Power: @batteryPower W </p>
+                                <LinearGaugeScaleRange From="-1000"
+                                                       To="-700"
+                                                       Color="#C20000">
+                                </LinearGaugeScaleRange>
+                            </LinearGaugeScaleRanges>
+                        </LinearGaugeScale>
+                    </LinearGaugeScales>
+                    <LinearGaugePointers>
+                        <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
+                    </LinearGaugePointers>
+                </TelerikLinearGauge>
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                <CompactCard Value="@pvPower" Symbol="☀️" Text="PV Power" Unit="W" />
+            </Content>
+        </TileLayoutItem>
+        <TileLayoutItem>
+            <Content>
+                @* Can be +/-*@
+                <CompactCard Value="@gridPower" Symbol="🏭" Text="Grid Power" Unit="W" />
+            </Content>
+        </TileLayoutItem>
 
-<TelerikLinearGauge Transitions="false">
-    <LinearGaugeScales>
-        <LinearGaugeScale Min="-1000" Max="1000" Vertical="true">
-            <LinearGaugeScaleRanges>
-                <LinearGaugeScaleRange From="0"
-                                       To="1000"
-                                       Color="#00FF62">
-                </LinearGaugeScaleRange>
-                <LinearGaugeScaleRange From="-250"
-                                       To="0"
-                                       Color="#FFE162">
-                </LinearGaugeScaleRange>
+    </TileLayoutItems>
+</TelerikTileLayout>
 
-                <LinearGaugeScaleRange From="-700"
-                                       To="-250"
-                                       Color="#FF8400">
-                </LinearGaugeScaleRange>
 
-                <LinearGaugeScaleRange From="-1000"
-                                       To="-700"
-                                       Color="#C20000">
-                </LinearGaugeScaleRange>
-            </LinearGaugeScaleRanges>
-        </LinearGaugeScale>
-    </LinearGaugeScales>
-    <LinearGaugePointers>
-        <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
-    </LinearGaugePointers>
-</TelerikLinearGauge>
 
-<p>PV Power     : @pvPower      W</p>
 
-@* Can be +/-*@
-<p>Grid Power   : @gridPower    W</p>
+
+
+
+
