@@ -7,6 +7,7 @@ using static BlazorSolarPowerHour.Components.Services.TopicNameHelper;
 namespace BlazorSolarPowerHour.Components.Pages;
 public partial class Home
 {
+    string localStorageKey = "tile-layout-state";
     int UIupdateRate = 2; //TODO: Move to app settings
     string message = "Undefined";
     string batteryPower = "";
@@ -18,28 +19,57 @@ public partial class Home
     ObservableCollection<string> LiveMessages = new();
     bool isSubscribed = false;
     DateTime lastRender = DateTime.Now;
-    TelerikArcGauge? BatteryLevelGauge { get; set; }
+    TelerikArcGauge? BatteryLevelPercentageGauge { get; set; }
     TelerikLinearGauge? BatteryPowerGauge { get; set; }
-    void ItemResize() {
-        BatteryLevelGauge?.Refresh();
+    TelerikLinearGauge? BatteryLevelGauge { get; set; }
+    TelerikTileLayout? TileLayoutInstance { get; set; }
+    async Task ItemResize()
+    {
+        BatteryLevelPercentageGauge?.Refresh();
         BatteryPowerGauge?.Refresh();
+        BatteryLevelGauge?.Refresh();
+       await SaveState();
     }
+
+    async Task OnReorder()
+    {
+        await SaveState();
+    }
+
+    async Task SaveState()
+    {
+        TileLayoutState? state = TileLayoutInstance?.GetState();
+        if (state is null) return;
+        await localStorage.SetItemAsync(localStorageKey, state);
+    }
+
+    async Task LoadState()
+    {
+        TileLayoutState? state = await localStorage.GetItemAsync<TileLayoutState>(localStorageKey);
+        if (state is null) return;
+        TileLayoutInstance?.SetState(state);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await service.SetupMQTT(GotMessage);
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            await LoadState();
+        }
         lastRender = DateTime.Now;
         base.OnAfterRender(firstRender);
     }
 
-    async Task ToggleConnection(bool value)
+    async Task ToggleConnection()
     {
-        isSubscribed = value;
+        isSubscribed = !isSubscribed;
 
-        if (value)
+        if (isSubscribed)
         {
             await service.SubscribeAsync();
         }
@@ -78,7 +108,7 @@ public partial class Home
         {
             // update UI - load's current power
             loadPower = e.ApplicationMessage.PayloadSegment.GetTopicValue();
-            
+
         }
 
         //TODO: Fix dealy of first GotMessage render

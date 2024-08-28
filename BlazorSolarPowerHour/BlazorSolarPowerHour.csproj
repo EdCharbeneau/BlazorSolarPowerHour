@@ -8,8 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="MQTTnet" Version="4.3.6.1152" />
-    <PackageReference Include="Telerik.UI.for.Blazor" Version="6.0.2" />
+    <PackageReference Include="Telerik.UI.for.Blazor" Version="6.2.0" />
   </ItemGroup>
 
 </Project>

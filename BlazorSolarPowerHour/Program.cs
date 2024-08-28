@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using BlazorSolarPowerHour.Components;
 using BlazorSolarPowerHour.Components.Services;
 
@@ -8,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddTelerikBlazor();
 builder.Services.AddScoped<MQTTUIService>();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿@inject MQTTUIService service
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @page "/"
 
 @using System.Text
@@ -9,16 +10,29 @@
 
 <h1>Solar Dashboard</h1>
 
-<TelerikSwitch ValueChanged="((bool value) => ToggleConnection(value))" OnLabel="Connected" OffLabel="Disconnected" Width="120px" />
+<TelerikToolBar>
+    <ToolBarToggleButton OnClick="ToggleConnection" Selected="isSubscribed">
+        @if (isSubscribed)
+        {
+            <text>Connected</text>
+        } else
+        {
+            <text>Disconnected</text>
+        }
+    </ToolBarToggleButton>
+</TelerikToolBar>
 
-<TelerikTileLayout Columns="4"
+<TelerikTileLayout @ref="TileLayoutInstance"
+        Columns="4"
                    Reorderable="true"
                    Resizable="true"
-                   OnResize="@ItemResize">
+                   OnResize="ItemResize"
+                   OnReorder="OnReorder">
     <TileLayoutItems>
-        <TileLayoutItem HeaderText="Battery Power">
+
+        <TileLayoutItem HeaderText="Battery Percentage">
             <Content>
-                <TelerikArcGauge @ref="BatteryLevelGauge">
+                <TelerikArcGauge @ref="BatteryLevelPercentageGauge">
                     <ArcGaugeCenterLabel>
                         <Template>
                             @(context.Pointers[0].Value)% Battery
@@ -33,20 +47,21 @@
                 </TelerikArcGauge>
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+        <TileLayoutItem HeaderText="Load Power">
             <Content>
-                <CompactCard Value="@loadPower" Symbol="💡" Text="Load Power" Unit="W" />
+                <CompactCard Value="@loadPower" Symbol="💡" Unit="W" />
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+        <TileLayoutItem HeaderText="Battery Power">
             <Content>
                 @* Can be +/-*@
-                <CompactCard Value="@batteryPower" Symbol="🔋" Text="Battery Power" Unit="W" />
+                <CompactCard Value="@batteryPower" Symbol="🔋" Unit="W" />
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+
+        <TileLayoutItem HeaderText="Battery Power">
             <Content>
-                <TelerikLinearGauge @ref="BatteryPowerGauge" Transitions="false" >
+                <TelerikLinearGauge @ref="BatteryPowerGauge" Transitions="false">
                     <LinearGaugePointers>
                         <LinearGaugePointer Value="@batteryPowerValue" />
                     </LinearGaugePointers>
@@ -67,9 +82,10 @@
                 </TelerikLinearGauge>
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+
+        <TileLayoutItem HeaderText="Battery Level">
             <Content>
-                <TelerikLinearGauge Transitions="false">
+                <TelerikLinearGauge Transitions="false" @ref="BatteryLevelGauge">
                     <LinearGaugeScales>
                         <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
                             <LinearGaugeScaleRanges>
@@ -100,15 +116,16 @@
                 </TelerikLinearGauge>
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+
+        <TileLayoutItem HeaderText="PV Power">
             <Content>
-                <CompactCard Value="@pvPower" Symbol="☀️" Text="PV Power" Unit="W" />
+                <CompactCard Value="@pvPower" Symbol="☀️" Unit="W" />
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem>
+        <TileLayoutItem HeaderText="Grid Power">
             <Content>
                 @* Can be +/-*@
-                <CompactCard Value="@gridPower" Symbol="🏭" Text="Grid Power" Unit="W" />
+                <CompactCard Value="@gridPower" Symbol="🏭" Unit="W" />
             </Content>
         </TileLayoutItem>
 
