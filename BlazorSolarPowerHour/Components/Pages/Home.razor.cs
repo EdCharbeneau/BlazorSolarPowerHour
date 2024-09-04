@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using MQTTnet.Client;
 using System.Collections.ObjectModel;
 using Telerik.Blazor.Components;
-using static BlazorSolarPowerHour.Components.Services.TopicHelper;
+using static BlazorSolarPowerHour.Models.TopicHelper;
 using System.Text;
 
 namespace BlazorSolarPowerHour.Components.Pages;

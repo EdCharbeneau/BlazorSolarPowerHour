@@ -1,7 +1,4 @@
-﻿namespace BlazorSolarPowerHour.Components.Services;
-
-using System.Diagnostics;
-using System.Reflection;
+﻿namespace BlazorSolarPowerHour.Models;
 
 public static class TopicHelper
 {

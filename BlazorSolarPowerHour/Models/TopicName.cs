@@ -1,4 +1,4 @@
-﻿namespace BlazorSolarPowerHour.Components.Services;
+﻿namespace BlazorSolarPowerHour.Models;
 
 public enum TopicName
 {
