@@ -1,6 +1,4 @@
-﻿@inject MQTTUIService service
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
-@page "/"
+﻿@page "/"
 
 @using System.Text
 @using System.Collections.ObjectModel
@@ -11,7 +9,7 @@
 <h1>Solar Dashboard</h1>
 
 <TelerikToolBar>
-    <ToolBarToggleButton OnClick="ToggleConnection" Selected="isSubscribed">
+   @*  <ToolBarToggleButton OnClick="ToggleConnection" Selected="isSubscribed">
         @if (isSubscribed)
         {
             <text>Connected</text>
@@ -19,7 +17,7 @@
         {
             <text>Disconnected</text>
         }
-    </ToolBarToggleButton>
+    </ToolBarToggleButton> *@
 </TelerikToolBar>
 
 <TelerikTileLayout @ref="TileLayoutInstance"
