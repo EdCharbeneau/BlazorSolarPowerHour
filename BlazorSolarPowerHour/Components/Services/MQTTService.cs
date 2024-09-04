@@ -69,7 +69,7 @@ public class MQTTService : IAsyncDisposable
         Console.WriteLine(e.ApplicationMessage.Topic);
 
         // Read the topic string. I return a strong type that we can easily work with it instead of crazy strings.
-        var topicName = TopicNameHelper.GetTopicName(e.ApplicationMessage.Topic);
+        var topicName = TopicHelper.GetTopicName(e.ApplicationMessage.Topic);
 
         // Read the payload. Important! It is in the form of an ArraySegment<byte>, so we need to convert to byte[], then to ASCII.
         var decodedPayload = Encoding.ASCII.GetString(e.ApplicationMessage.PayloadSegment.ToArray());

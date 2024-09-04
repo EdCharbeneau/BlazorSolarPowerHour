@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using System.Reflection;
 
-public static class TopicNameHelper
+public static class TopicHelper
 {
     /// <summary>
     /// Converts the topic string (e.g. 'solar_assistant/inverter_1/battery_current/state') to a more easily workable enum
@@ -62,7 +62,7 @@ public static class TopicNameHelper
         };
     }
 
-    public static string GetTopicFromTopicName(TopicName topicName)
+    public static string GetTopic(TopicName topicName)
     {
         return topicName switch
         {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using MQTTnet.Client;
 using System.Collections.ObjectModel;
 using Telerik.Blazor.Components;
-using static BlazorSolarPowerHour.Components.Services.TopicNameHelper;
+using static BlazorSolarPowerHour.Components.Services.TopicHelper;
 using System.Text;
 
 namespace BlazorSolarPowerHour.Components.Pages;
@@ -67,8 +67,8 @@ public partial class Home
     private async Task GetValues()
     {
         var x = await DataService.GetMeasurementsAsync(DateTime.Now.AddMinutes(-2), DateTime.Now);
-        pvPower = x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.PvEnergy_Total))?.Value?.ToString() ?? "-";
-        batterChargeLevelPercent = double.Parse(x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.StateOfCharge_Battery1))?.Value ?? "0");
+        pvPower = x.FirstOrDefault(item => item?.Topic == TopicHelper.GetTopic(TopicName.PvEnergy_Total))?.Value?.ToString() ?? "-";
+        batterChargeLevelPercent = double.Parse(x.FirstOrDefault(item => item?.Topic == TopicHelper.GetTopic(TopicName.StateOfCharge_Battery1))?.Value ?? "0");
         //pvPower = x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.PvEnergy_Total))?.ToString() ?? "-";
         // gridPower = "";
         // loadPower = "";
