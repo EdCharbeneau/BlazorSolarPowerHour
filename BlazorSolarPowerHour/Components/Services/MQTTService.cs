@@ -74,6 +74,8 @@ public class MQTTService : IAsyncDisposable
                 .Build();
 
             await mqttClient!.UnsubscribeAsync(options, CancellationToken.None);
+
+            IsSubscribed = false;
         }
 
         mqttClient?.Dispose();
