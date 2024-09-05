@@ -6,86 +6,107 @@ using MQTTnet.Packets;
 using System.Text;
 
 namespace BlazorSolarPowerHour.Components.Services;
+
 public class MQTTService : IAsyncDisposable
 {
+    private readonly MessagesDbService dbService;
     private readonly string mqttHost;
     private readonly string mqttPort;
-    private readonly MessagesDbService dbService;
-    private MqttFactory mqttFactory = new();
-    private IMqttClient? mqttClient;
-    public bool IsSubscribed { get; set; }
+    private readonly MqttFactory? mqttFactory;
+    private readonly IMqttClient? mqttClient;
+
     public MQTTService(IConfiguration config, MessagesDbService dbService)
     {
+        this.dbService = dbService;
+
         mqttHost = config["MqttHost"] ?? throw new InvalidOperationException("Set the MqttHost for the application in configuration.");
         mqttPort = config["MqttPort"] ?? "1883";
-        this.dbService = dbService;
+
+        this.mqttFactory = new MqttFactory();
+        this.mqttClient = mqttFactory?.CreateMqttClient();
+
+        if(mqttClient == null)
+            throw new NullReferenceException("The MQTT client could not be created.");
+
+        this.mqttClient.ApplicationMessageReceivedAsync += GotMessage;
     }
+
+    public bool IsSubscribed { get; set; }
 
     public async Task StartAsync()
     {
-        mqttClient = mqttFactory.CreateMqttClient();
-        MqttClientOptions options = new MqttClientOptionsBuilder()
-            .WithTcpServer(host: mqttHost, port: int.Parse(mqttPort))
+        // Connect to the MQTT server
+        var port = int.TryParse(mqttPort, out var portNumber) ? portNumber : 1883;
+        var clientOptions = new MqttClientOptionsBuilder()
+            .WithTcpServer(mqttHost, port)
             .Build();
-        mqttClient.ApplicationMessageReceivedAsync += GotMessage;
-        await mqttClient.ConnectAsync(options);
+        await mqttClient!.ConnectAsync(clientOptions, CancellationToken.None);
 
-        var subscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-            .WithTopicFilter(t => t.WithTopic("solar_assistant/#"))
+        // Subscribe to the topics
+        var mqttSubscribeOptions = mqttFactory?.CreateSubscribeOptionsBuilder()
+            .WithTopicFilter(f => { f.WithTopic("solar_assistant/#"); })
             .Build();
+        await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
-        if (mqttClient is null) throw new InvalidOperationException("Client cannot be null when subscribing.");
-        await mqttClient.SubscribeAsync(subscribeOptions, CancellationToken.None);
+        // Public signal to let the rest of the application know we are subscribed.
         IsSubscribed = true;
-    }
-
-    //public async Task SetupMQTT(Func<MqttApplicationMessageReceivedEventArgs, Task> messageDelegate)
-    //{
-    //    mqttClient = mqttFactory.CreateMqttClient();
-    //    MqttClientOptions options = new MqttClientOptionsBuilder()
-    //        .WithTcpServer(host: mqttHost, port: int.Parse(mqttPort))
-    //        .Build();
-    //    mqttClient.ApplicationMessageReceivedAsync += messageDelegate;
-    //    await mqttClient.ConnectAsync(options);
-    //}
-
-    //public async Task SubscribeAsync()
-    //{
-
-        
-    //}
-    public async Task UnsubscribeAsync()
-    {
-        var options = mqttFactory.CreateUnsubscribeOptionsBuilder()
-            .WithTopicFilter(new MqttTopicFilter() { Topic = "solar_assistant/#" })
-            .Build();
-
-        if (mqttClient is null) throw new InvalidOperationException("Client cannot be null when subscribing.");
-        await mqttClient.UnsubscribeAsync(options, CancellationToken.None);
     }
 
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
         Console.WriteLine(e.ApplicationMessage.Topic);
 
-        // Read the topic string. I return a strong type that we can easily work with it instead of crazy strings.
-        var topicName = TopicNameHelper.GetTopicName(e.ApplicationMessage.Topic);
-
-        // Read the payload. Important! It is in the form of an ArraySegment<byte>, so we need to convert to byte[], then to ASCII.
-        var decodedPayload = Encoding.ASCII.GetString(e.ApplicationMessage.PayloadSegment.ToArray());
-
-        var item = new MqttDataItem { Topic = e.ApplicationMessage.Topic, Value = decodedPayload, Timestamp = DateTime.Now };
-
-        await dbService.AddMeasurementAsync(item);
-
+        await dbService.AddMeasurementAsync(new MqttDataItem
+        {
+            Topic = e.ApplicationMessage.Topic, 
+            Value = Encoding.ASCII.GetString(e.ApplicationMessage.PayloadSegment.ToArray()), 
+            Timestamp = DateTime.Now
+        });
     }
 
     public async ValueTask DisposeAsync()
     {
         if (IsSubscribed)
         {
-            await UnsubscribeAsync();
+            // Unsubscribe, be nice to the broker
+            var options = mqttFactory?.CreateUnsubscribeOptionsBuilder()
+                .WithTopicFilter(new MqttTopicFilter() { Topic = "solar_assistant/#" })
+                .Build();
+
+            await mqttClient!.UnsubscribeAsync(options, CancellationToken.None);
+
+            IsSubscribed = false;
         }
+
         mqttClient?.Dispose();
     }
+
+    //public async Task SubscribeAsync()
+    //{
+    //    // Connect to the MQTT server
+
+    //    var port = int.TryParse(mqttPort, out var portNumber) ? portNumber : 1883;
+    //    var clientOptions = new MqttClientOptionsBuilder()
+    //        .WithTcpServer(mqttHost, port)
+    //        .Build();
+
+    //    await mqttClient!.ConnectAsync(clientOptions, CancellationToken.None);
+
+    //    // Subscribe to the topics
+    //    var mqttSubscribeOptions = mqttFactory?.CreateSubscribeOptionsBuilder()
+    //        .WithTopicFilter(f => { f.WithTopic("solar_assistant/#"); })
+    //        .Build();
+
+    //    await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+    //}
+
+    //public async Task UnsubscribeAsync()
+    //{
+    //    var options = mqttFactory.CreateUnsubscribeOptionsBuilder()
+    //        .WithTopicFilter(new MqttTopicFilter() { Topic = "solar_assistant/#" })
+    //        .Build();
+
+    //    if (mqttClient is null) throw new InvalidOperationException("Client cannot be null when subscribing.");
+    //    await mqttClient.UnsubscribeAsync(options, CancellationToken.None);
+    //}
 }

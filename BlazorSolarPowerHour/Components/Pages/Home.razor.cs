@@ -1,21 +1,18 @@
-using BlazorSolarPowerHour.Components.Services;
 using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
 using Microsoft.AspNetCore.Components;
-using MQTTnet.Client;
-using System.Collections.ObjectModel;
 using Telerik.Blazor.Components;
-using static BlazorSolarPowerHour.Components.Services.TopicNameHelper;
-using System.Text;
+using static BlazorSolarPowerHour.Models.TopicHelper;
 
 namespace BlazorSolarPowerHour.Components.Pages;
+
 public partial class Home
 {
     [Inject]
     public MessagesDbService DataService { get; set; } = default!;
 
     [Inject]
-    Blazored.LocalStorage.ILocalStorageService localStorage { get; set; } = default!;
+    Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
 
     TelerikArcGauge? BatteryLevelPercentageGauge { get; set; }
     TelerikLinearGauge? BatteryPowerGauge { get; set; }
@@ -30,7 +27,13 @@ public partial class Home
     string pvPower = "";
     string gridPower = "";
     string loadPower = "";
-    MqttDataItem[] SolarData = [];
+
+    // Instead of this array, MqttDataItem[] SolarData = [], use the chart object type, so we can bind it to a chart
+    //ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new() { MaximumCount = 120 };
+    //ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new() { MaximumCount = 120 };
+    //ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new() { MaximumCount = 120 };
+    //ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
+    //ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
 
     async Task ItemResize()
     {
@@ -49,12 +52,12 @@ public partial class Home
     {
         TileLayoutState? state = TileLayoutInstance?.GetState();
         if (state is null) return;
-        await localStorage.SetItemAsync(localStorageKey, state);
+        await LocalStorage.SetItemAsync(localStorageKey, state);
     }
 
     async Task LoadState()
     {
-        TileLayoutState? state = await localStorage.GetItemAsync<TileLayoutState>(localStorageKey);
+        TileLayoutState? state = await LocalStorage.GetItemAsync<TileLayoutState>(localStorageKey);
         if (state is null) return;
         TileLayoutInstance?.SetState(state);
     }
@@ -66,39 +69,31 @@ public partial class Home
 
     private async Task GetValues()
     {
+        // Step 1. Get the last 2 minutes of data from the database
         var x = await DataService.GetMeasurementsAsync(DateTime.Now.AddMinutes(-2), DateTime.Now);
-        pvPower = x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.PvEnergy_Total))?.Value?.ToString() ?? "-";
-        batterChargeLevelPercent = double.Parse(x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.StateOfCharge_Battery1))?.Value ?? "0");
-        //pvPower = x.FirstOrDefault(item => item?.Topic == TopicNameHelper.GetTopicFromTopicName(TopicName.PvEnergy_Total))?.ToString() ?? "-";
-        // gridPower = "";
-        // loadPower = "";
 
-         //if (topicName == TopicName.StateOfCharge_Battery1)
-    //    {
-    //        // update UI with value of the battery's current power
-    //        batterChargeLevelPercent = double.Parse(decodedPayload);
-    //    }
-    //    if (topicName == TopicName.BatteryPower_Total)
-    //    {
-    //        // update UI with value of the battery's current power
-    //        batteryPower = decodedPayload;
-    //        batteryPowerValue = double.Parse(batteryPower);
-    //    }
-    //    if (topicName == TopicName.PvPower1_Inverter1)
-    //    {
-    //        // update UI - solar panel's current power
-    //        pvPower = decodedPayload;
-    //    }
-    //    if (topicName == TopicName.GridPower_Inverter1)
-    //    {
-    //        // update UI - grid's current power
-    //        gridPower = decodedPayload;
-    //    }
-    //    if (topicName == TopicName.LoadPower_Inverter1)
-    //    {
-    //        // update UI - load's current power
-    //        loadPower = decodedPayload;
-    //    }
+        // Step 2. Get the individual topics from the data
+        var pvPowerValues = x.Where(item => item.Topic == GetTopic(TopicName.PvEnergy_Total));
+        var gridPowerValues = x.Where(item => item.Topic == GetTopic(TopicName.GridPower_Inverter1));
+        var loadPowerValues = x.Where(item => item.Topic == GetTopic(TopicName.LoadPower_Inverter1));
+        var batteryPowerValues = x.Where(item => item.Topic == GetTopic(TopicName.BatteryPower_Total));
+        var batteryChargeLevelValues = x.Where(item => item.Topic == GetTopic(TopicName.StateOfCharge_Battery1));
+
+        // Step 3. Get the most recent value to show the most recent "live" value
+        pvPower = pvPowerValues.FirstOrDefault()?.Value ?? "-";
+        gridPower = gridPowerValues.FirstOrDefault()?.Value ?? "-";
+        loadPower = loadPowerValues.FirstOrDefault()?.Value ?? "-";
+        batteryPower = batteryPowerValues.FirstOrDefault()?.Value ?? "-";
+
+        batterChargeLevelPercent = double.Parse(batteryChargeLevelValues.FirstOrDefault()?.Value ?? "0");
+        batteryPowerValue = double.Parse(batteryPower);
+
+
+        // Step 4. Charts - Now we have the data from step #2
+        // SolarPowerData = pvPowerValues.Select(item => new ChartMqttDataItem { CurrentValue = double.Parse(item.Value), Timestamp = item.Timestamp });
+        // LoadPowerData = loadPowerValues.Select(item => new ChartMqttDataItem {  CurrentValue = double.Parse(item.Value), Timestamp = item.Timestamp });
+        // BatteryPowerData = batteryPowerValues.Select(item => new ChartMqttDataItem {  CurrentValue = double.Parse(item.Value), Timestamp = item.Timestamp });
+        // GridPowerData = gridPowerValues.Select(item => new ChartMqttDataItem {  CurrentValue = double.Parse(item.Value), Timestamp = item.Timestamp });
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -107,79 +102,9 @@ public partial class Home
         {
             await LoadState();
         }
-        base.OnAfterRender(firstRender);
+
+        await base.OnAfterRenderAsync(firstRender);
     }
-
-
-    //private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
-    //{
-    //    Console.WriteLine(e.ApplicationMessage.Topic);
-
-    //    // *************************************************************************** //
-    //    // ******** Step 1 - Get the topic and payload data out of the message ******* //
-    //    // *************************************************************************** //
-
-    //    // Read the topic string. I return a strong type that we can easily work with it instead of crazy strings.
-    //    var topicName = TopicNameHelper.GetTopicName(e.ApplicationMessage.Topic);
-
-    //    // Read the payload. Important! It is in the form of an ArraySegment<byte>, so we need to convert to byte[], then to ASCII.
-    //    var decodedPayload = Encoding.ASCII.GetString(e.ApplicationMessage.PayloadSegment.ToArray());
-
-    //    var item = new MqttDataItem { Topic = e.ApplicationMessage.Topic, Value = decodedPayload, Timestamp = DateTime.Now };
-
-
-    //    // *************************************************************************** //
-    //    // ************ Step 2 - Store the item in the long term storage ************* //
-    //    // *************************************************************************** //
-
-    //    if (IsDatabaseEnabled)
-    //    {
-    //        // Save item to database
-    //        await DataService.AddMeasurementAsync(item);
-    //    }
-
-
-    //    // *************************************************************************** //
-    //    // ************* Step 3 - Now we can do something with that data ************* //
-    //    // *************************************************************************** //
-
-    //    if (topicName == TopicName.StateOfCharge_Battery1)
-    //    {
-    //        // update UI with value of the battery's current power
-    //        batterChargeLevelPercent = double.Parse(decodedPayload);
-    //    }
-    //    if (topicName == TopicName.BatteryPower_Total)
-    //    {
-    //        // update UI with value of the battery's current power
-    //        batteryPower = decodedPayload;
-    //        batteryPowerValue = double.Parse(batteryPower);
-    //    }
-    //    if (topicName == TopicName.PvPower1_Inverter1)
-    //    {
-    //        // update UI - solar panel's current power
-    //        pvPower = decodedPayload;
-    //    }
-    //    if (topicName == TopicName.GridPower_Inverter1)
-    //    {
-    //        // update UI - grid's current power
-    //        gridPower = decodedPayload;
-    //    }
-    //    if (topicName == TopicName.LoadPower_Inverter1)
-    //    {
-    //        // update UI - load's current power
-    //        loadPower = decodedPayload;
-    //    }
-
-    //    //TODO: Fix dealy of first GotMessage render
-    //    if ((DateTime.Now - lastRender).TotalSeconds > UIupdateRate)
-    //    {
-    //        await InvokeAsync(StateHasChanged);
-    //    }
-
-    //    LiveMessages.Add(e.ApplicationMessage.Topic);
-    //}
-
-
 
     // For future use
     // ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new(){ MaximumCount = 120 };
