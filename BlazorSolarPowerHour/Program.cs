@@ -21,7 +21,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<MessagesDbService>();
 builder.Services.AddScoped<MqttService>();
 
-// Option 2: Using MqttService as a background service
+// Option 2: Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
 //builder.Services.AddScoped<MqttService>();
 //builder.Services.AddHostedService<MqttService>();
 

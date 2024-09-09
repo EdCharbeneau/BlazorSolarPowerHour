@@ -83,6 +83,8 @@ public class MqttService : IAsyncDisposable
 
 
 // *** For explanation during live stream *** //
+// The service can now operate as a scopeless background task by implementing IHostedService
+// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
 
 //public class MqttService2(IConfiguration config, IServiceProvider serviceProvider) : BackgroundService, IAsyncDisposable
 //{
