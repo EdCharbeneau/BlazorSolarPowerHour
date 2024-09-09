@@ -2,7 +2,7 @@ using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
 using Microsoft.AspNetCore.Components;
 using Telerik.Blazor.Components;
-using static BlazorSolarPowerHour.Models.TopicHelper;
+using static BlazorSolarPowerHour.Models.MessageUtilities;
 
 namespace BlazorSolarPowerHour.Components.Pages;
 
@@ -28,12 +28,12 @@ public partial class Home
     string gridPower = "";
     string loadPower = "";
 
-    // Instead of this array, MqttDataItem[] SolarData = [], use the chart object type, so we can bind it to a chart
-    //ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new() { MaximumCount = 120 };
-    //ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new() { MaximumCount = 120 };
-    //ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new() { MaximumCount = 120 };
-    //ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
-    //ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
+    // For charts:
+    // ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new() { MaximumCount = 120 };
+    // ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new() { MaximumCount = 120 };
+    // ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new() { MaximumCount = 120 };
+    // ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
+    // ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
 
     async Task ItemResize()
     {
@@ -106,12 +106,6 @@ public partial class Home
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    // For future use
-    // ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new(){ MaximumCount = 120 };
-    // ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new(){ MaximumCount = 120 };
-    // ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new(){ MaximumCount = 120 };
-    // ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new(){ MaximumCount = 120 };
-    // ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new(){ MaximumCount = 120 };
     // double BatteryChargePercentage { get; set; } = 0;
     // string CurrentSolar { get; set; } = "0";
     // string CurrentLoad { get; set; } = "0";

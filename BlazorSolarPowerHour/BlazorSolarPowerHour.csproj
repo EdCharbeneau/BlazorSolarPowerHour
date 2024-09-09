@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Components\Services\NewFile.txt" />
     <None Remove="Models\NewFile.txt" />
   </ItemGroup>
 

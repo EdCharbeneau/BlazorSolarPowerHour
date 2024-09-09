@@ -1,6 +1,5 @@
 using Blazored.LocalStorage;
 using BlazorSolarPowerHour.Components;
-using BlazorSolarPowerHour.Components.Services;
 using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +17,13 @@ builder.Services.AddRazorComponents()
 builder.Services.AddTelerikBlazor();
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<MQTTService>();
+// Option 1: Without background service
 builder.Services.AddScoped<MessagesDbService>();
+builder.Services.AddScoped<MqttService>();
+
+// Option 2: Using MqttService as a background service
+//builder.Services.AddScoped<MqttService>();
+//builder.Services.AddHostedService<MqttService>();
 
 
 var app = builder.Build();
@@ -35,7 +39,7 @@ using (var serviceScope = app.Services.CreateScope())
         await dbContext.Database.MigrateAsync();
     }
 
-    var mqttService = serviceScope.ServiceProvider.GetRequiredService<MQTTService>();
+    var mqttService = serviceScope.ServiceProvider.GetRequiredService<MqttService>();
 
     await mqttService.StartAsync();
     

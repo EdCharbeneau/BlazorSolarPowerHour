@@ -1,6 +1,4 @@
-﻿using BlazorSolarPowerHour.Components.Services;
-
-namespace BlazorSolarPowerHour.Models;
+﻿namespace BlazorSolarPowerHour.Models;
 
 public class ChartMqttDataItem
 {
