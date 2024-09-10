@@ -3,25 +3,26 @@
 @using System.Text
 @using System.Collections.ObjectModel
 @using BlazorSolarPowerHour.Components.DashboardComponents
+@using BlazorSolarPowerHour.Models
 
 <PageTitle>Home</PageTitle>
 
 <h1>Solar Dashboard</h1>
 
 <TelerikToolBar>
-   @*  <ToolBarToggleButton OnClick="ToggleConnection" Selected="isSubscribed">
-        @if (isSubscribed)
-        {
-            <text>Connected</text>
-        } else
-        {
-            <text>Disconnected</text>
-        }
+    @*  <ToolBarToggleButton OnClick="ToggleTimer" Selected="IsTimerRunning">
+    @if (IsTimerRunning)
+    {
+    <text>On</text>
+    } else
+    {
+    <text>Off</text>
+    }
     </ToolBarToggleButton> *@
 </TelerikToolBar>
 
 <TelerikTileLayout @ref="TileLayoutInstance"
-        Columns="4"
+                   Columns="4"
                    Reorderable="true"
                    Resizable="true"
                    OnResize="ItemResize"
@@ -127,6 +128,61 @@
             </Content>
         </TileLayoutItem>
 
+       @*  <TileLayoutItem Class="chart-tile" RowSpan="2" ColSpan="5">
+            <HeaderTemplate>
+                <div>
+                    <span style="font-size:16px;font-weight:400">
+                        Total Generation |  Inverter Mode: @((MarkupString)inverterMode) | Charging Source Priority: @((MarkupString)chargerSourcePriority)
+                    </span>
+                </div>
+            </HeaderTemplate>
+            <Content>
+                <TelerikChart @ref="@SystemPowerChartRef" Width="100%" Transitions="false" RenderAs="RenderingMode.Canvas">
+                    <ChartTooltip Visible="true" />
+                    <ChartLegend Position="ChartLegendPosition.Bottom" />
+                    <ChartSeriesItems>
+                        <ChartSeries Name="Solar"
+                                     Data="@SolarPowerData"
+                                     Field="@nameof(ChartMqttDataItem.CurrentValue)"
+                                     CategoryField="@nameof(ChartMqttDataItem.Timestamp)"
+                                     Type="ChartSeriesType.Line"
+                                     Axis="PowerAxis" />
+                        <ChartSeries Name="Load"
+                                     Data="@LoadPowerData"
+                                     Field="@nameof(ChartMqttDataItem.CurrentValue)"
+                                     CategoryField="@nameof(ChartMqttDataItem.Timestamp)"
+                                     Type="ChartSeriesType.Line"
+                                     Axis="PowerAxis" />
+                        <ChartSeries Name="Battery"
+                                     Data="@BatteryPowerData"
+                                     Field="@nameof(ChartMqttDataItem.CurrentValue)"
+                                     CategoryField="@nameof(ChartMqttDataItem.Timestamp)"
+                                     Type="ChartSeriesType.Line"
+                                     Axis="PowerAxis" />
+                        <ChartSeries Name="Grid"
+                                     Data="@GridPowerData"
+                                     Field="@nameof(ChartMqttDataItem.CurrentValue)"
+                                     CategoryField="@nameof(ChartMqttDataItem.Timestamp)"
+                                     Type="ChartSeriesType.Line"
+                                     Axis="PowerAxis" />
+                    </ChartSeriesItems>
+
+                    <ChartCategoryAxes>
+                        <ChartCategoryAxis BaseUnit="ChartCategoryAxisBaseUnit.Minutes" Type="ChartCategoryAxisType.Date">
+                            <ChartCategoryAxisLabels Format="{0:mm ssss}" />
+                        </ChartCategoryAxis>
+                    </ChartCategoryAxes>
+
+                    <ChartValueAxes>
+                        <ChartValueAxis Name="PowerAxis">
+                            <ChartValueAxisTitle Text="Power" />
+                            <ChartValueAxisLabels Format="{0:N0} W" />
+                            <ChartValueAxisMajorGridLines Visible="false" />
+                        </ChartValueAxis>
+                    </ChartValueAxes>
+                </TelerikChart>
+            </Content>
+        </TileLayoutItem> *@
     </TileLayoutItems>
 </TelerikTileLayout>
 
