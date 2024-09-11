@@ -8,9 +8,9 @@
 <PageTitle>Home</PageTitle>
 
 <h1>Solar Dashboard</h1>
-
+@IsTimerRunning
 <TelerikToolBar>
-    @*  <ToolBarToggleButton OnClick="ToggleTimer" Selected="IsTimerRunning">
+    <ToolBarToggleButton OnClick="ToggleTimer" @bind-Selected="IsTimerRunning">
     @if (IsTimerRunning)
     {
     <text>On</text>
@@ -18,7 +18,7 @@
     {
     <text>Off</text>
     }
-    </ToolBarToggleButton> *@
+    </ToolBarToggleButton>
 </TelerikToolBar>
 
 <TelerikTileLayout @ref="TileLayoutInstance"
@@ -128,11 +128,11 @@
             </Content>
         </TileLayoutItem>
 
-       @*  <TileLayoutItem Class="chart-tile" RowSpan="2" ColSpan="5">
+         <TileLayoutItem Class="chart-tile" RowSpan="2" ColSpan="5">
             <HeaderTemplate>
                 <div>
                     <span style="font-size:16px;font-weight:400">
-                        Total Generation |  Inverter Mode: @((MarkupString)inverterMode) | Charging Source Priority: @((MarkupString)chargerSourcePriority)
+                        Total Generation |  Inverter Mode: @inverterMode | Charging Source Priority: @chargerSourcePriority
                     </span>
                 </div>
             </HeaderTemplate>
@@ -182,7 +182,7 @@
                     </ChartValueAxes>
                 </TelerikChart>
             </Content>
-        </TileLayoutItem> *@
+        </TileLayoutItem> 
     </TileLayoutItems>
 </TelerikTileLayout>
 

@@ -17,13 +17,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddTelerikBlazor();
 builder.Services.AddBlazoredLocalStorage();
 
-// Option 1: Without background service
+// Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
 builder.Services.AddScoped<MessagesDbService>();
-builder.Services.AddScoped<MqttService>();
-
-// Option 2: Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
-//builder.Services.AddScoped<MqttService>();
-//builder.Services.AddHostedService<MqttService>();
+builder.Services.AddHostedService<MqttService>();
 
 
 var app = builder.Build();
@@ -38,10 +34,6 @@ using (var serviceScope = app.Services.CreateScope())
     {
         await dbContext.Database.MigrateAsync();
     }
-
-    var mqttService = serviceScope.ServiceProvider.GetRequiredService<MqttService>();
-
-    await mqttService.StartAsync();
     
 }
 

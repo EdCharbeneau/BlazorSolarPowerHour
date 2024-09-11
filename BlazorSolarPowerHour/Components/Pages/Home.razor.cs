@@ -1,12 +1,13 @@
 using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
+using CommonHelpers.Collections;
 using Microsoft.AspNetCore.Components;
 using Telerik.Blazor.Components;
 using static BlazorSolarPowerHour.Models.MessageUtilities;
 
 namespace BlazorSolarPowerHour.Components.Pages;
 
-public partial class Home
+public partial class Home : IDisposable
 {
     [Inject]
     public MessagesDbService DataService { get; set; } = default!;
@@ -18,9 +19,16 @@ public partial class Home
     TelerikLinearGauge? BatteryPowerGauge { get; set; }
     TelerikLinearGauge? BatteryLevelGauge { get; set; }
     TelerikTileLayout? TileLayoutInstance { get; set; }
+    TelerikChart? SystemPowerChartRef { get; set; }
+
+    // For charts:
+    ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new() { MaximumCount = 120 };
+    ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new() { MaximumCount = 120 };
+    ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new() { MaximumCount = 120 };
+    ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
+    ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
 
     string localStorageKey = "tile-layout-state";
-    string message = "Undefined";
     string batteryPower = "";
     double batteryPowerValue;
     double batterChargeLevelPercent;
@@ -29,6 +37,10 @@ public partial class Home
     string loadPower = "";
     string inverterMode = "Solar/Battery/Grid";
     string chargerSourcePriority = "Solar";
+
+    CancellationTokenSource? cts;
+    int LoadDataInterval { get; set; } = 2000;
+    bool IsTimerRunning { get; set; }
 
     async Task ItemResize()
     {
@@ -57,22 +69,50 @@ public partial class Home
         TileLayoutInstance?.SetState(state);
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        // We are using OnAfterRenderAsync instead, to avoid deadlock when calling GetValues() from here.
-        // await GetValues();
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await LoadState();
 
-            await GetValues();
+            cts = new CancellationTokenSource();
+
+            IsTimerRunning = true;
+
+            await IntervalDataUpdate();
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task ToggleTimer()
+    {
+        if (!IsTimerRunning)
+        {
+            if (cts?.Token == null)
+            {
+                cts = new CancellationTokenSource();
+
+                await IntervalDataUpdate();
+            }
+        }
+        else
+        {
+            if (cts != null)
+                await cts.CancelAsync();
+        }
+    }
+
+    async Task IntervalDataUpdate()
+    {
+        while (cts?.Token != null)
+        {
+            await Task.Delay(LoadDataInterval, cts.Token);
+
+            await GetValues();
+
+            StateHasChanged();
+        }
     }
 
     async Task GetValues()
@@ -110,91 +150,32 @@ public partial class Home
 
         // *** Step 3. Get some historical data for charts. *** //
 
-        //foreach (var item in items.Take(60))
-        //{
-        //    var topicName = GetTopicName(item.Topic);
-        //    switch (topicName)
-        //    {
-        //        case TopicName.LoadPower_Inverter1:
-        //            LoadPowerData.Add(new ChartMqttDataItem{ Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
-        //            break;
-        //        case TopicName.PvPower_Inverter1:
-        //            SolarPowerData.Add(new ChartMqttDataItem{ Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
-        //            break;
-        //        case TopicName.BatteryPower_Total:
-        //            BatteryPowerData.Add(new ChartMqttDataItem{ Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
-        //            break;
-        //        case TopicName.GridPower_Inverter1:
-        //            GridPowerData.Add(new ChartMqttDataItem{ Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
-        //            break;
-        //        case TopicName.BatteryStateOfCharge_Total:
-        //            BatteryChargeData.Add(new ChartMqttDataItem{ Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
-        //            break;
-        //    }
-        //}
+        foreach (var item in items.Take(60))
+        {
+            var topicName = GetTopicName(item.Topic ?? "");
+            switch (topicName)
+            {
+                case TopicName.LoadPower_Inverter1:
+                    LoadPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    break;
+                case TopicName.PvPower_Inverter1:
+                    SolarPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    break;
+                case TopicName.BatteryPower_Total:
+                    BatteryPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    break;
+                case TopicName.GridPower_Inverter1:
+                    GridPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    break;
+                case TopicName.BatteryStateOfCharge_Total:
+                    BatteryChargeData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    break;
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        cts?.Cancel();
     }
 }
-
-
-
-// For Wednesday 9/11
-
-// CancellationTokenSource? cts;
-// int LoadDataInterval { get; set; } = 2000;
-// bool IsTimerRunning { get; set; }
-
-// string CurrentInverterMode { get; set; } = "Solar/Battery/Grid";
-// string ChargerSourcePriority { get; set; } = "Solar";
-
-// For charts:
-// ObservableRangeCollection<ChartMqttDataItem> SolarPowerData { get; } = new() { MaximumCount = 120 };
-// ObservableRangeCollection<ChartMqttDataItem> LoadPowerData { get; } = new() { MaximumCount = 120 };
-// ObservableRangeCollection<ChartMqttDataItem> BatteryPowerData { get; } = new() { MaximumCount = 120 };
-// ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
-// ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
-
-//protected override async Task OnAfterRenderAsync(bool firstRender)
-//{
-//    await base.OnAfterRenderAsync(firstRender);
-//
-//    if (firstRender)
-//    {
-//        await LoadState();
-//
-//        cts = new CancellationTokenSource();
-//
-//        IsTimerRunning = true;
-//
-//        await IntervalDataUpdate();
-//    }
-//}
-
-//async Task IntervalDataUpdate()
-//{
-//    while (cts?.Token != null)
-//    {
-//        await Task.Delay(LoadDataInterval, cts.Token);
-//
-//        await GetDataAsync();
-//
-//        StateHasChanged();
-//    }
-//}
-
-//async Task ToggleTimer()
-//{
-//    if (IsTimerRunning)
-//    {
-//        if(cts?.Token == null)
-//        {
-//            cts = new CancellationTokenSource();
-//
-//            await IntervalDataUpdate();
-//        }
-//    }
-//    else
-//    {
-//        if(cts != null)
-//            await cts.CancelAsync();
-//    }
-//}
