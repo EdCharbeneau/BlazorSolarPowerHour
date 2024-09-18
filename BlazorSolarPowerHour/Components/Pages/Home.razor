@@ -11,14 +11,27 @@
 @IsTimerRunning
 <TelerikToolBar>
     <ToolBarToggleButton OnClick="ToggleTimer" @bind-Selected="IsTimerRunning">
-    @if (IsTimerRunning)
-    {
-    <text>On</text>
-    } else
-    {
-    <text>Off</text>
-    }
+        @if (IsTimerRunning)
+        {
+            <text>On</text>
+        } else
+        {
+            <text>Off</text>
+        }
     </ToolBarToggleButton>
+    
+    <ToolBarSeparator />
+    
+    <ToolBarTemplateItem>
+        @if (IsServiceSubscribedToTopics)
+        {
+            <text>��</text>
+        }
+        else
+        {
+            <text>��</text>
+        }
+    </ToolBarTemplateItem>
 </TelerikToolBar>
 
 <TelerikTileLayout @ref="TileLayoutInstance"
