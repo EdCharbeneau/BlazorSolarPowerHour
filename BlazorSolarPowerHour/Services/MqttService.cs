@@ -2,7 +2,6 @@
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Packets;
-using static BlazorSolarPowerHour.Models.MessageUtilities;
 
 namespace BlazorSolarPowerHour.Services;
 
@@ -15,9 +14,9 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
     private readonly string mqttPort = config["MQTT_PORT"] ?? string.Empty;
 
     // External acknowledgement of live connection
-    public bool IsSubscribed { get; set; }
+    public bool IsSubscribedToTopic { get; set; }
     public delegate void SubscribedChanged(bool isSubscribed);
-    public event SubscribedChanged? SubscribeChanged;
+    public event SubscribedChanged? SubscriptionChanged;
 
     // This is required in order to get the scoped DbService in a BackgroundService (we cannot inject it in the CTOR because it is scoped)
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,8 +42,8 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
                 .Build(),
             CancellationToken.None);
 
-        IsSubscribed = true;
-        SubscribeChanged?.Invoke(IsSubscribed);
+        IsSubscribedToTopic = true;
+        SubscriptionChanged?.Invoke(IsSubscribedToTopic);
     }
 
 
@@ -68,7 +67,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
     // This is called by IHostedService
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (IsSubscribed)
+        if (IsSubscribedToTopic)
         {
             // Unsubscribe, be nice to the broker
             var options = mqttFactory?.CreateUnsubscribeOptionsBuilder()
@@ -77,8 +76,8 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
 
             await mqttClient!.UnsubscribeAsync(options, CancellationToken.None);
 
-            IsSubscribed = false;
-            SubscribeChanged?.Invoke(false);
+            IsSubscribedToTopic = false;
+            SubscriptionChanged?.Invoke(false);
         }
     }
 
