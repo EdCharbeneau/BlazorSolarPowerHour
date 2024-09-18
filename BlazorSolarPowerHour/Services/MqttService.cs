@@ -46,7 +46,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
         SubscriptionChanged?.Invoke(IsSubscribedToTopic);
     }
 
-
+    // This is called every time a new message comes in (once for each topic)
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
         // Get the value from the payload
