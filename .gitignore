@@ -365,3 +365,6 @@ BlazorSolarPowerHour/Measurements.db
 BlazorSolarPowerHour/Measurements.db-shm
 BlazorSolarPowerHour/Measurements.db-wal
 *.db
+/BlazorSolarPowerHour/Measurements.db
+/BlazorSolarPowerHour/Measurements.db-shm
+/BlazorSolarPowerHour/Measurements.db-wal
