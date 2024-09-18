@@ -138,7 +138,7 @@ public partial class Home : IDisposable
         batterChargeLevelPercent = Convert.ToDouble(items.FindLast(d => d.Topic == GetTopic(TopicName.BatteryStateOfCharge_Total))?.Value!);
 
         // power entering/leaving the batteries
-        batteryPower = items.FindLast(d => d.Topic == GetTopic(TopicName.BatteryPower_Total))?.Value!;
+        batteryPower = items.FindLast(d => d.Topic == GetTopic(TopicName.BatteryPower_Total))?.Value ?? "0";
         batteryPowerValue = double.Parse(batteryPower);
 
         // the mode of the inverter (which source is the priority)
