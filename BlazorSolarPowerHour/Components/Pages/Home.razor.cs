@@ -12,8 +12,7 @@ public partial class Home : IDisposable
     [Inject]
     public MessagesDbService DataService { get; set; } = default!;
 
-    [Inject]
-    public MqttService LiveService { get; set; } = default!;
+    
 
     [Inject]
     Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
@@ -44,7 +43,6 @@ public partial class Home : IDisposable
     CancellationTokenSource? cts;
     int LoadDataInterval { get; set; } = 2000;
     bool IsTimerRunning { get; set; }
-    private bool IsServiceSubscribedToTopics { get; set; }
 
     async Task ItemResize()
     {
@@ -77,8 +75,6 @@ public partial class Home : IDisposable
     {
         if (firstRender)
         {
-            LiveService.SubscriptionChanged += (isSubscribed) => { IsServiceSubscribedToTopics = isSubscribed; };
-
             await LoadState();
 
             cts = new CancellationTokenSource();
