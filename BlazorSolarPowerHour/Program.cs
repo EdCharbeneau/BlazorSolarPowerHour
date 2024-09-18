@@ -17,9 +17,12 @@ builder.Services.AddRazorComponents()
 builder.Services.AddTelerikBlazor();
 builder.Services.AddBlazoredLocalStorage();
 
-// Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
+// Setup the database service as a normal scoped service
 builder.Services.AddScoped<MessagesDbService>();
-builder.Services.AddHostedService<MqttService>();
+
+// Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
+builder.Services.AddSingleton<MqttService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<MqttService>());
 
 
 var app = builder.Build();
