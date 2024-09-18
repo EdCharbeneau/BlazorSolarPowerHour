@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+BlazorSolarPowerHour/Measurements.db
+BlazorSolarPowerHour/Measurements.db-shm
+BlazorSolarPowerHour/Measurements.db-wal
+*.db
