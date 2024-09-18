@@ -1,68 +1,72 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorSolarPowerHour.Services
+@inherits LayoutComponentBase
 <TelerikRootComponent>
     <div class="k-body">
+        <TelerikAppBar PositionMode="AppBarPositionMode.Sticky"
+                       ThemeColor="@ThemeConstants.AppBar.ThemeColor.Dark"
+                       Class="machine-manufacturing-appbar">
+            <AppBarSection Class="k-flex-basis-0 k-flex-grow k-gap-x-xs-6 k-gap-x-lg-20">
+                <a href="#" class="k-d-flex k-gap-1.5">
+                    <img src="@LogoSrc" alt="Logo" />
+                    <img src="@LogoTextSrc" alt="Logo Text" class="k-d-xs-none k-d-lg-inline" />
+                </a>
+                <TelerikButton OnClick="@ToggleDrawer" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="SvgIcon.Menu" Title="Menu"></TelerikButton>
+            </AppBarSection>
+            
+            <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-center">
+                <TelerikTextBox Placeholder="Input Value" ShowPrefixSeparator="false" Class="machine-manufacturing-textbox k-d-xs-none k-d-lg-flex">
+                    <TextBoxPrefixTemplate>
+                        <TelerikSvgIcon Icon="@SvgIcon.Search" />
+                    </TextBoxPrefixTemplate>
+                </TelerikTextBox>
+                <TelerikButton Title="Search" Class="k-d-xs-inline-flex k-d-lg-none" FillMode="@ThemeConstants.Button.FillMode.Flat" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary" Icon="SvgIcon.Search"></TelerikButton>
+            </AppBarSection>
 
-    <TelerikAppBar PositionMode="AppBarPositionMode.Sticky"
-                   ThemeColor="@ThemeConstants.AppBar.ThemeColor.Dark"
-                   Class="machine-manufacturing-appbar">
-        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-gap-x-xs-6 k-gap-x-lg-20">
-            <a href="#" class="k-d-flex k-gap-1.5">
-                <img src="@LogoSrc" alt="Logo" />
-                <img src="@LogoTextSrc" alt="Logo Text" class="k-d-xs-none k-d-lg-inline" />
-            </a>
-            <TelerikButton OnClick="@ToggleDrawer" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="SvgIcon.Menu" Title="Menu"></TelerikButton>
-        </AppBarSection>
-        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-center">
-            <TelerikTextBox Placeholder="Input Value" ShowPrefixSeparator="false" Class="machine-manufacturing-textbox k-d-xs-none k-d-lg-flex">
-                <TextBoxPrefixTemplate>
-                    <TelerikSvgIcon Icon="@SvgIcon.Search" />
-                </TextBoxPrefixTemplate>
-            </TelerikTextBox>
-            <TelerikButton Title="Search" Class="k-d-xs-inline-flex k-d-lg-none" FillMode="@ThemeConstants.Button.FillMode.Flat" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary" Icon="SvgIcon.Search"></TelerikButton>
-        </AppBarSection>
-        <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
-            <div class="k-badge-container">
-                <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
-                <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
-                              Position="@BadgePosition.Inside"
-                              HorizontalAlign="@BadgeHorizontalAlign.End"
-                              VerticalAlign="@BadgeVerticalAlign.Top"
-                              ThemeColor="@ThemeConstants.Badge.ThemeColor.Primary">
-                </TelerikBadge>
-            </div>
-            <span class="k-appbar-separator k-border-border"></span>
-            <TelerikDropDownButton Icon="@SvgIcon.User" ShowArrowButton="false" FillMode="@ThemeConstants.Button.FillMode.Flat">
-                <DropDownButtonContent>
-                    Hi, admin!
-                </DropDownButtonContent>
-            </TelerikDropDownButton>
-        </AppBarSection>
-    </TelerikAppBar>
+            <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+                @if (IsServiceSubscribedToTopics)
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.CheckCircle" />
 
-    <TelerikDrawer Data="@DrawerItems"
-                   Mode="@DrawerMode.Push"
-                   MiniMode="true"
-                   @ref="@DrawerRef"
-                   @bind-Expanded="@DrawerExpanded"
-                   @bind-SelectedItem="@SelectedDrawerItem"
-                   Class="machine-manufacturing-drawer"
-                   Width="248px">
-        <DrawerContent>
-            <div class="k-m-4">
-                @Body
-            </div>
-        </DrawerContent>
-    </TelerikDrawer>
+                }
+                else
+                {
+                    <TelerikSvgIcon Icon="@SvgIcon.CancelCircle" />
+                }
+            </AppBarSection>
 
-@*     <TelerikDrawer Data="@Data" Mode="@DrawerMode.Push" MiniMode="true"
-                   @ref="@DrawerRef">
-        <DrawerContent>
-            <div class="k-m-4">
-                @Body
-            </div>
-        </DrawerContent>
-    </TelerikDrawer>
-*@
+            <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+                <div class="k-badge-container">
+                    <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
+                    <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
+                                  Position="@BadgePosition.Inside"
+                                  HorizontalAlign="@BadgeHorizontalAlign.End"
+                                  VerticalAlign="@BadgeVerticalAlign.Top"
+                                  ThemeColor="@ThemeConstants.Badge.ThemeColor.Primary">
+                    </TelerikBadge>
+                </div>
+                <span class="k-appbar-separator k-border-border"></span>
+                <TelerikDropDownButton Icon="@SvgIcon.User" ShowArrowButton="false" FillMode="@ThemeConstants.Button.FillMode.Flat">
+                    <DropDownButtonContent>
+                        Hi, admin!
+                    </DropDownButtonContent>
+                </TelerikDropDownButton>
+            </AppBarSection>
+        </TelerikAppBar>
+
+        <TelerikDrawer Data="@DrawerItems"
+                       Mode="@DrawerMode.Push"
+                       MiniMode="true"
+                       @ref="@DrawerRef"
+                       @bind-Expanded="@DrawerExpanded"
+                       @bind-SelectedItem="@SelectedDrawerItem"
+                       Class="machine-manufacturing-drawer"
+                       Width="248px">
+            <DrawerContent>
+                <div class="k-m-4">
+                    @Body
+                </div>
+            </DrawerContent>
+        </TelerikDrawer>
     </div>
 
 </TelerikRootComponent> 
@@ -74,10 +78,16 @@
 </div>
 
 @code {
+    [Inject]
+    public MqttService LiveService { get; set; } = default!;
+
+    private bool IsServiceSubscribedToTopics { get; set; }
+
     private string LogoSrc = "/dashboard/machine-manufacturing/logo.svg";
     private string LogoTextSrc = "/dashboard/machine-manufacturing/logo_text.svg";
     private async Task ToggleDrawer() => await DrawerRef.ToggleAsync();
     private bool DrawerExpanded { get; set; } = true;
+
     private DrawerItem? _selectedDrawerItem;
     private DrawerItem SelectedDrawerItem
     {
@@ -94,6 +104,16 @@
                 // new DrawerItem { Text = "Counter", Icon = SvgIcon.Plus, Url = "/counter" },
                 // new DrawerItem { Text = "Weather", Icon = SvgIcon.GridLayout, Url = "/weather" },
                                 };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LiveService.SubscriptionChanged += (isSubscribed) => { IsServiceSubscribedToTopics = isSubscribed; };
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
 
     public class DrawerItem
     {
