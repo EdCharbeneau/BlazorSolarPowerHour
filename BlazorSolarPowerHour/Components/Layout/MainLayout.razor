@@ -23,7 +23,7 @@
                 <TelerikButton Title="Search" Class="k-d-xs-inline-flex k-d-lg-none" FillMode="@ThemeConstants.Button.FillMode.Flat" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary" Icon="SvgIcon.Search"></TelerikButton>
             </AppBarSection>
 
-            <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+            @* <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
                 <text>Status</text>
                 @if (IsServiceSubscribedToTopics)
                 {
@@ -33,17 +33,28 @@
                 {
                     <TelerikSvgIcon Icon="@SvgIcon.CancelCircle" ThemeColor="@ThemeConstants.FontIcon.ThemeColor.Error"/>
                 }
-            </AppBarSection>
+            </AppBarSection> *@
 
             <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
                 <div class="k-badge-container">
-                    <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
+                    @* <TelerikButton Title="Notifications" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.Bell"></TelerikButton>
+
                     <TelerikBadge Rounded="@ThemeConstants.Badge.Rounded.Full"
                                   Position="@BadgePosition.Inside"
                                   HorizontalAlign="@BadgeHorizontalAlign.End"
                                   VerticalAlign="@BadgeVerticalAlign.Top"
                                   ThemeColor="@ThemeConstants.Badge.ThemeColor.Primary">
-                    </TelerikBadge>
+                    </TelerikBadge> *@
+                    
+                    @if (IsServiceSubscribedToTopics)
+                    {
+                        <TelerikButton Title="MQTT Connection" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.CheckCircle" ThemeColor="@ThemeConstants.FontIcon.ThemeColor.Success"></TelerikButton>
+                    }
+                    else
+                    {
+                        <TelerikButton Title="MQTT Connection" FillMode="@ThemeConstants.Button.FillMode.Flat" Icon="@SvgIcon.CancelCircle" ThemeColor="@ThemeConstants.FontIcon.ThemeColor.Error"></TelerikButton>
+                    }
+
                 </div>
                 <span class="k-appbar-separator k-border-border"></span>
                 <TelerikDropDownButton Icon="@SvgIcon.User" ShowArrowButton="false" FillMode="@ThemeConstants.Button.FillMode.Flat">
