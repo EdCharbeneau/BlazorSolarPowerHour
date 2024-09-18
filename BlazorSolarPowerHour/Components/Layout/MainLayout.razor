@@ -1,5 +1,6 @@
 ﻿@using BlazorSolarPowerHour.Services
 @inherits LayoutComponentBase
+
 <TelerikRootComponent>
     <div class="k-body">
         <TelerikAppBar PositionMode="AppBarPositionMode.Sticky"
@@ -23,14 +24,14 @@
             </AppBarSection>
 
             <AppBarSection Class="k-flex-basis-0 k-flex-grow k-justify-content-end k-gap-1.5">
+                <text>Status</text>
                 @if (IsServiceSubscribedToTopics)
                 {
-                    <TelerikSvgIcon Icon="@SvgIcon.CheckCircle" />
-
+                    <TelerikSvgIcon Icon="@SvgIcon.CheckCircle" ThemeColor="@ThemeConstants.FontIcon.ThemeColor.Success"/>
                 }
                 else
                 {
-                    <TelerikSvgIcon Icon="@SvgIcon.CancelCircle" />
+                    <TelerikSvgIcon Icon="@SvgIcon.CancelCircle" ThemeColor="@ThemeConstants.FontIcon.ThemeColor.Error"/>
                 }
             </AppBarSection>
 
@@ -83,8 +84,8 @@
 
     private bool IsServiceSubscribedToTopics { get; set; }
 
-    private string LogoSrc = "/dashboard/machine-manufacturing/logo.svg";
-    private string LogoTextSrc = "/dashboard/machine-manufacturing/logo_text.svg";
+    private readonly string LogoSrc = "/dashboard/machine-manufacturing/logo.svg";
+    private readonly string LogoTextSrc = "/dashboard/machine-manufacturing/logo_text.svg";
     private async Task ToggleDrawer() => await DrawerRef.ToggleAsync();
     private bool DrawerExpanded { get; set; } = true;
 
@@ -109,10 +110,17 @@
     {
         if (firstRender)
         {
-            LiveService.SubscriptionChanged += (isSubscribed) => { IsServiceSubscribedToTopics = isSubscribed; };
+            IsServiceSubscribedToTopics = LiveService.IsSubscribedToTopic;
+            LiveService.SubscriptionChanged += OnLiveServiceOnSubscriptionChanged;
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void OnLiveServiceOnSubscriptionChanged(bool isSubscribed)
+    {
+        IsServiceSubscribedToTopics = isSubscribed;
+        StateHasChanged();
     }
 
     public class DrawerItem
