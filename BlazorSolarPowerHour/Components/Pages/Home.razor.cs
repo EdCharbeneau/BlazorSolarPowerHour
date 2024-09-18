@@ -13,6 +13,9 @@ public partial class Home : IDisposable
     public MessagesDbService DataService { get; set; } = default!;
 
     [Inject]
+    public MqttService LiveService { get; set; } = default!;
+
+    [Inject]
     Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
 
     TelerikArcGauge? BatteryLevelPercentageGauge { get; set; }
@@ -28,7 +31,7 @@ public partial class Home : IDisposable
     ObservableRangeCollection<ChartMqttDataItem> GridPowerData { get; } = new() { MaximumCount = 120 };
     ObservableRangeCollection<ChartMqttDataItem> BatteryChargeData { get; } = new() { MaximumCount = 120 };
 
-    string localStorageKey = "tile-layout-state";
+    readonly string localStorageKey = "tile-layout-state";
     string batteryPower = "";
     double batteryPowerValue;
     double batterChargeLevelPercent;
@@ -41,6 +44,7 @@ public partial class Home : IDisposable
     CancellationTokenSource? cts;
     int LoadDataInterval { get; set; } = 2000;
     bool IsTimerRunning { get; set; }
+    private bool IsServiceSubscribedToTopics { get; set; }
 
     async Task ItemResize()
     {
@@ -73,6 +77,8 @@ public partial class Home : IDisposable
     {
         if (firstRender)
         {
+            LiveService.SubscriptionChanged += (isSubscribed) => { IsServiceSubscribedToTopics = isSubscribed; };
+
             await LoadState();
 
             cts = new CancellationTokenSource();
