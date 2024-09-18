@@ -46,7 +46,7 @@
                         <ArcGaugeScale Min="0" Max="100" />
                     </ArcGaugeScales>
                     <ArcGaugePointers>
-                        <ArcGaugePointer Value="@batterChargeLevelPercent" />
+                        <ArcGaugePointer Value="@batteryChargeValue" />
                     </ArcGaugePointers>
                 </TelerikArcGauge>
             </Content>
@@ -87,7 +87,7 @@
             </Content>
         </TileLayoutItem>
 
-        <TileLayoutItem HeaderText="Battery Level">
+        <TileLayoutItem HeaderText="Battery Charge">
             <Content>
                 <TelerikLinearGauge Transitions="false" @ref="BatteryLevelGauge">
                     <LinearGaugeScales>
