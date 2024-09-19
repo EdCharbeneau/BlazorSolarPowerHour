@@ -128,10 +128,10 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private void OnLiveServiceOnSubscriptionChanged(bool isSubscribed)
+    private async Task OnLiveServiceOnSubscriptionChanged()
     {
-        IsServiceSubscribedToTopics = isSubscribed;
-        StateHasChanged();
+        IsServiceSubscribedToTopics = LiveService.IsSubscribedToTopic;
+        await InvokeAsync(StateHasChanged);
     }
 
     public class DrawerItem

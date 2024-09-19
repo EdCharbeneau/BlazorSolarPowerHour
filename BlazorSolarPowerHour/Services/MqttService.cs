@@ -15,7 +15,9 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
 
     // External acknowledgement of live connection
     public bool IsSubscribedToTopic { get; set; }
-    public delegate void SubscribedChanged(bool isSubscribed);
+
+    // Event for detecting changes to MQTT subscription status
+    public delegate Task SubscribedChanged();
     public event SubscribedChanged? SubscriptionChanged;
 
     // This is required in order to get the scoped DbService in a BackgroundService (we cannot inject it in the CTOR because it is scoped)
@@ -43,7 +45,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
             CancellationToken.None);
 
         IsSubscribedToTopic = true;
-        SubscriptionChanged?.Invoke(IsSubscribedToTopic);
+        SubscriptionChanged?.Invoke();
     }
 
     // This is called every time a new message comes in (once for each topic)
@@ -77,7 +79,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
             await mqttClient!.UnsubscribeAsync(options, CancellationToken.None);
 
             IsSubscribedToTopic = false;
-            SubscriptionChanged?.Invoke(false);
+            SubscriptionChanged?.Invoke();
         }
     }
 
