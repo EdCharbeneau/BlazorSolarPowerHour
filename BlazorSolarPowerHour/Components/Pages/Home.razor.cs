@@ -72,6 +72,20 @@ public partial class Home : IDisposable
         TileLayoutInstance?.SetState(state);
     }
 
+
+    async Task ClearTileLayout()
+    {
+        TileLayoutItemState[] DefaultState = new TileLayoutItemState[]
+        {
+            new TileLayoutItemState { ColSpan = 1, Order = 0, RowSpan = 1 },
+            new TileLayoutItemState { ColSpan = 2, Order = 1, RowSpan = 1 },
+            new TileLayoutItemState { ColSpan = 1, Order = 2, RowSpan = 1 },
+            new TileLayoutItemState { ColSpan = 4, Order = 3, RowSpan = 1 }
+        };
+        await LocalStorage.RemoveItemAsync(localStorageKey);
+        TileLayoutInstance?.SetState(new() { ItemStates= DefaultState });
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -160,19 +174,19 @@ public partial class Home : IDisposable
             switch (topicName)
             {
                 case TopicName.LoadPower_Inverter1:
-                    LoadPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    LoadPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = item.Timestamp });
                     break;
                 case TopicName.PvPower_Inverter1:
-                    SolarPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    SolarPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = item.Timestamp });
                     break;
                 case TopicName.BatteryPower_Total:
-                    BatteryPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    BatteryPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = item.Timestamp });
                     break;
                 case TopicName.GridPower_Inverter1:
-                    GridPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    GridPowerData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = item.Timestamp });
                     break;
                 case TopicName.BatteryStateOfCharge_Total:
-                    BatteryChargeData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = DateTime.Now });
+                    BatteryChargeData.Add(new ChartMqttDataItem { Category = topicName, CurrentValue = Convert.ToDouble(item.Value), Timestamp = item.Timestamp });
                     break;
             }
         }

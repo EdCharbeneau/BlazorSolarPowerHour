@@ -368,3 +368,8 @@ BlazorSolarPowerHour/Measurements.db-wal
 /BlazorSolarPowerHour/Measurements.db
 /BlazorSolarPowerHour/Measurements.db-shm
 /BlazorSolarPowerHour/Measurements.db-wal
+
+# Database files
+/BlazorSolarPowerHour/*.db-shm
+/BlazorSolarPowerHour/*.db-wal
+/BlazorSolarPowerHour/*.db

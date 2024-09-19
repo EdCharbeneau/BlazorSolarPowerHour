@@ -19,12 +19,8 @@
             <text>Autorefresh: Off</text>
         }
     </ToolBarToggleButton>
-    
-    <ToolBarSeparator />
-    
-    <ToolBarTemplateItem>
-        
-    </ToolBarTemplateItem>
+    <ToolBarSpacer></ToolBarSpacer>
+    <ToolBarButton OnClick="ClearTileLayout" Icon="SvgIcon.Trash">Clear Layout</ToolBarButton>
 </TelerikToolBar>
 
 <TelerikTileLayout @ref="TileLayoutInstance"
@@ -34,36 +30,36 @@
                    OnResize="ItemResize"
                    OnReorder="OnReorder">
     <TileLayoutItems>
-        <TileLayoutItem HeaderText="Battery Percentage">
+        
+        <TileLayoutItem HeaderText="Power">
             <Content>
-                <TelerikArcGauge @ref="BatteryLevelPercentageGauge">
-                    <ArcGaugeCenterLabel>
-                        <Template>
-                            @(context.Pointers[0].Value)% Battery
-                        </Template>
-                    </ArcGaugeCenterLabel>
-                    <ArcGaugeScales>
-                        <ArcGaugeScale Min="0" Max="100" />
-                    </ArcGaugeScales>
-                    <ArcGaugePointers>
-                        <ArcGaugePointer Value="@batteryChargeValue" />
-                    </ArcGaugePointers>
-                </TelerikArcGauge>
-            </Content>
-        </TileLayoutItem>
-        <TileLayoutItem HeaderText="Load Power">
-            <Content>
-                <CompactCard Value="@loadPower" Symbol="💡" Unit="W" />
-            </Content>
-        </TileLayoutItem>
-        <TileLayoutItem HeaderText="Battery Power">
-            <Content>
-                @* Can be +/-*@
-                <CompactCard Value="@batteryPower" Symbol="🔋" Unit="W" />
+                <TelerikStackLayout Orientation="StackLayoutOrientation.Vertical" Spacing="2em">
+                    <div>
+                        <CompactCard Value="@loadPower" Symbol="💡" Unit="W" />
+                    </div>
+                    <div>
+                        @* Can be +/-*@
+                @if(batteryPowerValue < 0)
+                {
+                    <CompactCard Value="@batteryPower" Symbol="🪫" Unit="W" />
+                } 
+                else
+                {
+                    <CompactCard Value="@batteryPower" Symbol="🔋" Unit="W" />
+                }
+                    </div>
+                <div>
+                    <CompactCard Value="@pvPower" Symbol="☀️" Unit="W" />
+                </div>
+                <div>
+                 @* Can be +/-*@
+                <CompactCard Value="@gridPower" Symbol="🏭" Unit="W" />
+                </div>
+                </TelerikStackLayout>
             </Content>
         </TileLayoutItem>
 
-        <TileLayoutItem HeaderText="Battery Power">
+@*         <TileLayoutItem HeaderText="Battery Level">
             <Content>
                 <TelerikLinearGauge @ref="BatteryPowerGauge" Transitions="false">
                     <LinearGaugePointers>
@@ -85,7 +81,7 @@
                     </LinearGaugeScales>
                 </TelerikLinearGauge>
             </Content>
-        </TileLayoutItem>
+        </TileLayoutItem> *@
 
         <TileLayoutItem HeaderText="Battery Charge">
             <Content>
@@ -121,17 +117,24 @@
             </Content>
         </TileLayoutItem>
 
-        <TileLayoutItem HeaderText="PV Power">
+        <TileLayoutItem HeaderText="Battery Percentage">
             <Content>
-                <CompactCard Value="@pvPower" Symbol="☀️" Unit="W" />
+                <TelerikArcGauge @ref="BatteryLevelPercentageGauge">
+                    <ArcGaugeCenterLabel>
+                        <Template>
+                            @(context.Pointers[0].Value)% Battery
+                        </Template>
+                    </ArcGaugeCenterLabel>
+                    <ArcGaugeScales>
+                        <ArcGaugeScale Min="0" Max="100" />
+                    </ArcGaugeScales>
+                    <ArcGaugePointers>
+                        <ArcGaugePointer Value="@batterChargeLevelPercent" />
+                    </ArcGaugePointers>
+                </TelerikArcGauge>
             </Content>
         </TileLayoutItem>
-        <TileLayoutItem HeaderText="Grid Power">
-            <Content>
-                @* Can be +/-*@
-                <CompactCard Value="@gridPower" Symbol="🏭" Unit="W" />
-            </Content>
-        </TileLayoutItem>
+
 
          <TileLayoutItem Class="chart-tile" RowSpan="2" ColSpan="5">
             <HeaderTemplate>
@@ -173,8 +176,8 @@
                     </ChartSeriesItems>
 
                     <ChartCategoryAxes>
-                        <ChartCategoryAxis BaseUnit="ChartCategoryAxisBaseUnit.Minutes" Type="ChartCategoryAxisType.Date">
-                            <ChartCategoryAxisLabels Format="{0:mm ssss}" />
+                        <ChartCategoryAxis BaseUnit="ChartCategoryAxisBaseUnit.Fit" Type="ChartCategoryAxisType.Date">
+                            <ChartCategoryAxisLabels Format="{0:HH:mm}" />
                         </ChartCategoryAxis>
                     </ChartCategoryAxes>
 
