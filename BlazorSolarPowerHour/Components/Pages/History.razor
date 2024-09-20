@@ -1,0 +1,46 @@
+﻿@page "/history"
+@using CommonHelpers.Collections
+@using Telerik.DataSource
+<h3>History</h3>
+
+
+<div class="flex-container">
+    <div class="flex-child">
+    </div>
+</div>
+
+<TelerikGrid @ref="Grid" TItem="MqttDataItem" Height="600px" OnRead="OnRead"
+             Groupable="true"
+             Pageable="true"
+             Sortable="true"
+             SortMode="@SortMode.Single"
+             FilterMode="@GridFilterMode.FilterRow"
+             FilterRowDebounceDelay="250"
+             PageSize="25">
+    <GridToolBarTemplate>
+        <label>Report Range:</label>
+        <TelerikDateRangePicker StartValue="@StartDate" EndValue="@EndDate"
+                                BottomView="CalendarView.Year"
+                                StartValueChanged="@((DateTime sV) => StartValueChangedHandler(sV))"
+                                EndValueChanged="@((DateTime eV) => EndValueChangedHandler(eV))">
+        </TelerikDateRangePicker>
+    </GridToolBarTemplate>
+    <GridColumns>
+        <GridColumn Field="@nameof(MqttDataItem.Timestamp)" Width="250px" DisplayFormat="{0:MM/dd/yy}" Filterable="false">
+          
+        </GridColumn>
+        <GridColumn Field="@nameof(MqttDataItem.Topic)" />
+        <GridColumn Field="@nameof(MqttDataItem.Value)" />
+    </GridColumns>
+</TelerikGrid>
+
+<style>
+    .flex-container {
+        display: flex;
+    }
+
+    .flex-child {
+        margin-bottom: 10px;
+        margin-right: 10px;
+    }
+</style>

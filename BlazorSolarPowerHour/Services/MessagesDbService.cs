@@ -1,6 +1,8 @@
 ﻿using BlazorSolarPowerHour.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Telerik.Blazor.Data;
+using Telerik.DataSource;
+using Telerik.DataSource.Extensions;
 namespace BlazorSolarPowerHour.Services;
 
 public class MessagesDbService(MeasurementsDbContext dbContext)
@@ -13,6 +15,13 @@ public class MessagesDbService(MeasurementsDbContext dbContext)
     public async Task<List<MqttDataItem>> GetMeasurementsAsync(DateTime start, DateTime end)
     {
         return await dbContext.Measurements.Where(i => i.Timestamp > start && i.Timestamp < end).ToListAsync();
+    }
+
+    public async Task<DataSourceResult> GetMeasurementsRequestAsync(DateTime start, DateTime end, DataSourceRequest dataSourceRequest)
+    {
+        return await dbContext.Measurements
+            .Where(i => i.Timestamp > start && i.Timestamp < end)
+            .ToDataSourceResultAsync(dataSourceRequest);
     }
 
     public async Task<MqttDataItem> AddMeasurementAsync(MqttDataItem dataItem)
