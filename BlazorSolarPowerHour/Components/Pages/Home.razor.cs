@@ -142,29 +142,16 @@ public partial class Home : IDisposable
 
         // *** Step 2. Get the individual topics from the data *** //
 
-        // energy being consumed by the house (string, no parsing needed)
-        loadPower = items.Where(d => d.Topic == GetTopic(TopicName.LoadPower_Inverter1)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "0";
+        loadPower = items.GetNewestValue(TopicName.LoadPower_Inverter1, "0");
+        pvPower = items.GetNewestValue(TopicName.PvPower_Inverter1, "0");
+        gridPower = items.GetNewestValue(TopicName.GridPower_Inverter1, "0");
+        batteryPower = items.GetNewestValue(TopicName.BatteryPower_Total, "0");
+        batteryCharge = items.GetNewestValue(TopicName.BatteryStateOfCharge_Total, "0");
+        inverterMode = items.GetNewestValue(TopicName.DeviceMode_Inverter1, "unknown");
+        chargerSourcePriority = items.GetNewestValue(TopicName.ChargerSourcePriority_Inverter1, "unknown");
 
-        // solar panels' output power (string, no parsing needed)
-        pvPower = items.Where(d => d.Topic == GetTopic(TopicName.PvPower_Inverter1)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "0";
-
-        // energy being consumed from the grid (string, no parsing needed)
-        gridPower = items.Where(d => d.Topic == GetTopic(TopicName.GridPower_Inverter1)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "0";
-
-        // battery level in percentage (string, needs to be parsed for gauge render)
-        batteryCharge = items.Where(d => d.Topic == GetTopic(TopicName.BatteryStateOfCharge_Total)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "0";
-        batteryChargeValue = Convert.ToDouble(batteryCharge);
-
-        // power entering/leaving the batteries
-        batteryPower = items.Where(d => d.Topic == GetTopic(TopicName.BatteryPower_Total)).OrderBy(d=>d.Timestamp).LastOrDefault()?.Value ?? "0";
         batteryPowerValue = Convert.ToDouble(batteryPower);
-
-        // the mode of the inverter (which source is the priority)
-        inverterMode = items.Where(d => d.Topic == GetTopic(TopicName.DeviceMode_Inverter1)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "unknown";
-
-        // the battery charging source priority (usually solar, but can be Grid when there's an incoming storm)
-        chargerSourcePriority = items.Where(d => d.Topic == GetTopic(TopicName.ChargerSourcePriority_Inverter1)).OrderBy(d => d.Timestamp).LastOrDefault()?.Value ?? "unknown";
-
+        batteryChargeValue = Convert.ToDouble(batteryCharge);
 
         // *** Step 3. Get some historical data for charts. *** //
 
