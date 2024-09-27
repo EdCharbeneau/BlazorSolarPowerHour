@@ -69,7 +69,7 @@
     private readonly string LogoSrc = "/dashboard/machine-manufacturing/logo.svg";
     private readonly string LogoTextSrc = "/dashboard/machine-manufacturing/logo_text.svg";
     private async Task ToggleDrawer() => await DrawerRef.ToggleAsync();
-    private bool DrawerExpanded { get; set; } = true;
+    private bool DrawerExpanded { get; set; } = false;
 
     private DrawerItem? _selectedDrawerItem;
     private DrawerItem SelectedDrawerItem
