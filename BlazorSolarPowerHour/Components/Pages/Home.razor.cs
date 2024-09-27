@@ -136,7 +136,7 @@ public partial class Home : IDisposable
 
         // Get some historical data for charts
 
-        foreach (var item in items.Take(60))
+        foreach (var item in items)
         {
             var topicName = GetTopicName(item.Topic ?? "");
             switch (topicName)
