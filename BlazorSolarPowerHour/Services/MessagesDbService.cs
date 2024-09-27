@@ -1,8 +1,8 @@
 ﻿using BlazorSolarPowerHour.Models;
 using Microsoft.EntityFrameworkCore;
-using Telerik.Blazor.Data;
 using Telerik.DataSource;
 using Telerik.DataSource.Extensions;
+
 namespace BlazorSolarPowerHour.Services;
 
 public class MessagesDbService(MeasurementsDbContext dbContext)
@@ -26,31 +26,37 @@ public class MessagesDbService(MeasurementsDbContext dbContext)
 
     public async Task<MqttDataItem> AddMeasurementAsync(MqttDataItem dataItem)
     {
-        dbContext.Measurements.Add(dataItem);
+        await dbContext.AddAsync(dataItem);
 
         await dbContext.SaveChangesAsync();
 
         return dataItem;
     }
 
-    public async Task<MqttDataItem> UpdateMeasurementAsync(MqttDataItem item)
+    public async Task UpdateMeasurementAsync(MqttDataItem updatedItem)
     {
-        var productExist = dbContext.Measurements.FirstOrDefault(p => p.Id == item.Id);
+        // Optimized approach
+        var originalItem = await dbContext.FindAsync<MqttDataItem>(updatedItem.Id);
 
-        if (productExist != null)
+        if (originalItem != null)
         {
-            dbContext.Update(item);
+            dbContext.Entry(originalItem).State = EntityState.Detached;
 
+            dbContext.Update(updatedItem);
+ 
             await dbContext.SaveChangesAsync();
         }
-
-        return item;
     }
 
     public async Task DeleteMeasurementAsync(MqttDataItem item)
     {
-        dbContext.Measurements.Remove(item);
+        var originalItem = await dbContext.FindAsync<MqttDataItem>(item.Id);
 
-        await dbContext.SaveChangesAsync();
+        if(originalItem == null)
+        {
+            dbContext.Remove(item);
+
+            await dbContext.SaveChangesAsync();
+        }
     }
 }
