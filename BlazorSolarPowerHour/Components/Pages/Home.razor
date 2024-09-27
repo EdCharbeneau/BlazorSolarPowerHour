@@ -1,23 +1,26 @@
 ﻿@page "/"
 
-@using System.Text
-@using System.Collections.ObjectModel
 @using BlazorSolarPowerHour.Components.DashboardComponents
 
 <PageTitle>Home</PageTitle>
-
-<h1>Solar Dashboard</h1>
 
 <TelerikToolBar>
     <ToolBarToggleButton OnClick="ToggleTimer" @bind-Selected="IsTimerRunning">
         @if (IsTimerRunning)
         {
             <text>Autorefresh: On</text>
-        } else
+        }
+        else
         {
             <text>Autorefresh: Off</text>
         }
     </ToolBarToggleButton>
+    <ToolBarTemplateItem>
+        <TelerikDropDownList Data="@TimeRanges"
+                             Value="@ActiveTimeRange"
+                             ValueChanged="@((string newValue) => OnTimeRangeChanged(newValue))">
+        </TelerikDropDownList>
+    </ToolBarTemplateItem>
     <ToolBarSpacer></ToolBarSpacer>
     <ToolBarButton OnClick="ClearTileLayout" Icon="SvgIcon.Trash">Clear Layout</ToolBarButton>
 </TelerikToolBar>
@@ -29,7 +32,6 @@
                    OnResize="ItemResize"
                    OnReorder="OnReorder">
     <TileLayoutItems>
-        
         <TileLayoutItem HeaderText="Power">
             <Content>
                 <TelerikStackLayout Orientation="StackLayoutOrientation.Vertical" Spacing="2em">
@@ -38,111 +40,108 @@
                     </div>
                     <div>
                         @* Can be +/-*@
-                @if(batteryPowerValue < 0)
-                {
-                    <CompactCard Value="@batteryPower" Symbol="🪫" Unit="W" />
-                } 
-                else
-                {
-                    <CompactCard Value="@batteryPower" Symbol="🔋" Unit="W" />
-                }
+                        @if (batteryPowerValue < 0)
+                        {
+                            <CompactCard Value="@batteryPower" Symbol="🪫" Unit="W" />
+                        }
+                        else
+                        {
+                            <CompactCard Value="@batteryPower" Symbol="🔋" Unit="W" />
+                        }
                     </div>
-                <div>
-                    <CompactCard Value="@pvPower" Symbol="☀️" Unit="W" />
-                </div>
-                <div>
-                 @* Can be +/-*@
-                <CompactCard Value="@gridPower" Symbol="🏭" Unit="W" />
-                </div>
+                    <div>
+                        <CompactCard Value="@pvPower" Symbol="☀️" Unit="W" />
+                    </div>
+                    <div>
+                        @* Can be +/-*@
+                        <CompactCard Value="@gridPower" Symbol="🏭" Unit="W" />
+                    </div>
                 </TelerikStackLayout>
             </Content>
         </TileLayoutItem>
 
-@*         <TileLayoutItem HeaderText="Battery Level">
+        <TileLayoutItem HeaderText="Battery">
             <Content>
-                <TelerikLinearGauge @ref="BatteryPowerGauge" Transitions="false">
-                    <LinearGaugePointers>
-                        <LinearGaugePointer Value="@batteryPowerValue" />
-                    </LinearGaugePointers>
-                    <LinearGaugeScales>
-                        <LinearGaugeScale Vertical="false" Min="0" Max="1000" MajorUnit="500" MinorUnit="20">
-                            <LinearGaugeScaleRanges>
-                                <LinearGaugeScaleRange To="1000"
-                                                       From="750"
-                                                       Color="var(--kendo-color-error-emphasis)">
-                                </LinearGaugeScaleRange>
-                                <LinearGaugeScaleRange To="750"
-                                                       From="500"
-                                                       Color="var(--kendo-color-warning)">
-                                </LinearGaugeScaleRange>
-                            </LinearGaugeScaleRanges>
-                        </LinearGaugeScale>
-                    </LinearGaugeScales>
-                </TelerikLinearGauge>
-            </Content>
-        </TileLayoutItem> *@
-
-        <TileLayoutItem HeaderText="Battery Charge" ColSpan="2">
-            <Content>
-                <TelerikLinearGauge Transitions="false" @ref="BatteryLevelGauge">
-                    <LinearGaugeScales>
-                        <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
-                            <LinearGaugeScaleRanges>
-                                <LinearGaugeScaleRange From="0"
-                                                       To="1000"
-                                                       Color="#00FF62">
-                                </LinearGaugeScaleRange>
-                                <LinearGaugeScaleRange From="-250"
-                                                       To="0"
-                                                       Color="#FFE162">
-                                </LinearGaugeScaleRange>
-
-                                <LinearGaugeScaleRange From="-700"
-                                                       To="-250"
-                                                       Color="#FF8400">
-                                </LinearGaugeScaleRange>
-
-                                <LinearGaugeScaleRange From="-1000"
-                                                       To="-700"
-                                                       Color="#C20000">
-                                </LinearGaugeScaleRange>
-                            </LinearGaugeScaleRanges>
-                        </LinearGaugeScale>
-                    </LinearGaugeScales>
-                    <LinearGaugePointers>
-                        <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
-                    </LinearGaugePointers>
-                </TelerikLinearGauge>
-            </Content>
-        </TileLayoutItem>
-
-        <TileLayoutItem HeaderText="Battery Percentage">
-            <Content>
-                <TelerikArcGauge @ref="BatteryLevelPercentageGauge">
-                    <ArcGaugeCenterLabel>
-                        <Template>
-                            @(context.Pointers[0].Value)% Battery
-                        </Template>
-                    </ArcGaugeCenterLabel>
-                    <ArcGaugeScales>
-                        <ArcGaugeScale Min="0" Max="100" />
-                    </ArcGaugeScales>
-                    <ArcGaugePointers>
-                        <ArcGaugePointer Value="@batteryChargeValue" />
-                    </ArcGaugePointers>
-                </TelerikArcGauge>
-            </Content>
-        </TileLayoutItem>
-
-
-         <TileLayoutItem Class="chart-tile" RowSpan="2" ColSpan="5">
-            <HeaderTemplate>
                 <div>
-                    <span style="font-size:16px;font-weight:400">
-                        Total Generation |  Inverter Mode: @inverterMode | Charging Source Priority: @chargerSourcePriority
-                    </span>
+                    <TelerikArcGauge @ref="BatteryLevelPercentageGauge" Class="centered">
+                        <ArcGaugeCenterLabel>
+                            <Template>
+                                @(context.Pointers[0].Value)%
+                            </Template>
+                        </ArcGaugeCenterLabel>
+                        <ArcGaugeScales>
+                            <ArcGaugeScale Min="0" Max="100"/>
+                        </ArcGaugeScales>
+                        <ArcGaugePointers>
+                            <ArcGaugePointer Value="@batteryChargeValue"/>
+                        </ArcGaugePointers>
+                    </TelerikArcGauge>
                 </div>
-            </HeaderTemplate>
+                <h3>Power Flow (Watts)</h3>
+                <div>
+                    <TelerikLinearGauge Transitions="false" @ref="BatteryLevelGauge">
+                        <LinearGaugeScales>
+                            <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
+                                <LinearGaugeScaleRanges>
+                                    <LinearGaugeScaleRange From="0" To="1000" Color="#00FF62"/>
+                                    <LinearGaugeScaleRange From="-250" To="0" Color="#FFE162"/>
+                                    <LinearGaugeScaleRange From="-700" To="-250" Color="#FF8400"/>
+                                    <LinearGaugeScaleRange From="-1000" To="-700" Color="#C20000"/>
+                                </LinearGaugeScaleRanges>
+                            </LinearGaugeScale>
+                        </LinearGaugeScales>
+                        <LinearGaugePointers>
+                            <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
+                        </LinearGaugePointers>
+                    </TelerikLinearGauge>
+                </div>
+            </Content>
+        </TileLayoutItem>
+
+        <TileLayoutItem HeaderText="Voltages">
+            <Content>
+                <TelerikStackLayout Orientation="StackLayoutOrientation.Vertical" Spacing="1em">
+                    <div>
+                        <CompactCard Value="@batteryVoltage" Text="Battery" Unit="V" Symbol="⚡" />
+                    </div>
+                    <div>
+                        <CompactCard Value="@backToBatteryVoltage" Text="Back to Battery" Unit="V" Symbol="⚡" />
+                    </div>
+                    <div>
+                        <CompactCard Value="@pv1Voltage" Text="Solar Panels" Unit="V" Symbol="⚡" />
+                    </div>
+                    <div>
+                        <CompactCard Value="@busVoltage" Text="Bus" Unit="V" Symbol="⚡" />
+                    </div>
+                    <div>
+                        <CompactCard Value="@outputVoltage" Text="Inverter Output" Unit="V" Symbol="⚡" />
+                    </div>
+                </TelerikStackLayout>
+            </Content>
+        </TileLayoutItem>
+        
+        <TileLayoutItem HeaderText="Info">
+            <Content>
+                <TelerikStackLayout Orientation="StackLayoutOrientation.Vertical" Spacing="1em">
+                    <h3>Settings</h3>
+                    <div>
+                        <CompactCard Value="@inverterMode" Text="Inverter Mode" Symbol="🎛️"/>
+                    </div>
+                    <div>
+                        <CompactCard Value="@chargerSourcePriority" Text="Charge Priority" Symbol="🎚️"/>
+                    </div>
+                    <h3>Frequencies</h3>
+                    <div>
+                        <CompactCard Value="@gridFrequency" Text="Grid" Unit="Hz" Symbol="📡"/>
+                    </div>
+                    <div>
+                        <CompactCard Value="@outputFrequency" Text="Inverter Output" Unit="Hz" Symbol="📡"/>
+                    </div>
+                </TelerikStackLayout>
+            </Content>
+        </TileLayoutItem>
+        
+        <TileLayoutItem Class="chart-tile" RowSpan="1" ColSpan="2">
             <Content>
                 <TelerikChart @ref="@SystemPowerChartRef" Width="100%" Transitions="false" RenderAs="RenderingMode.Canvas">
                     <ChartTooltip Visible="true" />
@@ -189,6 +188,55 @@
                     </ChartValueAxes>
                 </TelerikChart>
             </Content>
-        </TileLayoutItem> 
+        </TileLayoutItem>
+
+        <TileLayoutItem HeaderText="Battery Level History" RowSpan="1" ColSpan="2">
+            <Content>
+                <TelerikChart @ref="@BatteryPercentageChartRef"
+                              Width="100%"
+                              Transitions="false"
+                              RenderAs="RenderingMode.Canvas">
+                    <ChartTooltip Visible="true" />
+                    <ChartLegend Position="ChartLegendPosition.Bottom" />
+
+                    <ChartSeriesItems>
+                        <ChartSeries Name="BatteryChargeSeries"
+                                     Data="@BatteryChargeData"
+                                     Field="@nameof(ChartMqttDataItem.CurrentValue)"
+                                     CategoryField="@nameof(ChartMqttDataItem.Timestamp)"
+                                     Type="ChartSeriesType.Area"
+                                     Axis="PowerAxis" />
+                    </ChartSeriesItems>
+                    <ChartCategoryAxes>
+                        <ChartCategoryAxis BaseUnit="ChartCategoryAxisBaseUnit.Fit"
+                                           Type="ChartCategoryAxisType.Date">
+                            <ChartCategoryAxisLabels Format="{0:H:mm}">
+                                <ChartCategoryAxisLabelsRotation Angle="-45" />
+                            </ChartCategoryAxisLabels>
+                        </ChartCategoryAxis>
+                    </ChartCategoryAxes>
+                    <ChartValueAxes>
+                        <ChartValueAxis Name="PowerAxis">
+                            <ChartValueAxisTitle Text="Charge" />
+                            <ChartValueAxisLabels Format="{0:N0}" />
+                        </ChartValueAxis>
+                    </ChartValueAxes>
+                </TelerikChart>
+            </Content>
+        </TileLayoutItem>
     </TileLayoutItems>
 </TelerikTileLayout>
+
+<script suppress-error="BL9992">
+    function chartCategoryAxisLabelTemplate(context) {
+        return context.value.toLocaleTimeString() + "\n" + context.value.toLocaleDateString();
+    }
+</script>
+
+<style>
+    .centered {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
