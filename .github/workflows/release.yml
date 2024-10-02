@@ -1,0 +1,181 @@
+name: Releases
+
+on:
+  workflow_dispatch:
+
+# Needed for:
+# id-token/content - akeyless to prove this repo has permission to access Lance's secret
+# packages - to publish the docker image to the repo's packages registry
+permissions:
+  id-token: write 
+  contents: read
+  packages: write
+
+env:
+  CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:8.0"
+  CONTAINER_REGISTRY: "ghcr.io"
+  CONTAINER_REPOSITORY: "edcharbeneau/powerproduction"
+  PROJECT_PATH: 'BlazorSolarPowerHour\BlazorSolarPowerHour.csproj'
+
+jobs:
+  # Creates a common version number using year.monthday.runnumber for all the builds to use (e.g., 2024.328.4 or 2024.1031.16)
+  shared-resources:
+    runs-on: ubuntu-22.04
+    outputs:
+      tag_prefix: ${{steps.tag-creator.outputs.tag_prefix}}
+      telerik_nuget_key: ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}}
+    steps:
+    - name: Generate tag prefix
+      id: tag-creator
+      run: |
+        buildDay=`date +%Y.%m.%d`
+        tags="$buildDay.$GITHUB_RUN_NUMBER"
+        echo "tag_prefix=$tags" >> $GITHUB_OUTPUT
+
+    - name: Fetch secrets from AKeyless
+      id: akeyless
+      uses: LanceMcCarthy/akeyless-action@v3
+      with:
+        access-id: "p-fq3qbjjxv839"
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        export-secrets-to-outputs: true
+        export-secrets-to-environment: false
+
+
+  #######################################################################
+  #         .NET SDK CONTAINER BUILD (no Dockerfile needed!)            #
+  #######################################################################
+  
+  # Build an x64 image
+  build_x64:
+    runs-on: ubuntu-22.04
+    needs: [shared-resources]
+    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    outputs:
+      build_tag: ${{ steps.build.outputs.build_tag }}
+    env:
+      target_arch: "x64"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Login to GitHub Container Registry
+      run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
+
+    - name: Add Telerik NuGet Package Source
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+
+    - name: Restore NuGet Packages
+      run: dotnet restore ${{env.PROJECT_PATH}} -r "linux-${{env.target_arch}}"
+
+    - name: build the x64 image
+      id: build
+      run: |
+        TAG="${{env.TAG_PREFIX}}-${{env.target_arch}}"
+        echo "build_tag=$TAG" >> $GITHUB_OUTPUT
+        dotnet publish ${{env.PROJECT_PATH}} -t:PublishContainer -p PublishProfile=DefaultContainer --arch ${{env.target_arch}} -p ContainerImageTag="$TAG" -p ContainerRepository=${{env.CONTAINER_REPOSITORY}} -p ContainerRegistry=${{env.CONTAINER_REGISTRY}} -p ContainerBaseImage=${{env.CONTAINER_BASE_IMAGE}} --no-restore
+      env:
+        TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
+
+  # Build an linux-arm64 image
+  build_arm64:
+    runs-on: ubuntu-22.04
+    needs: [shared-resources]
+    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      build_tag: ${{ steps.build.outputs.build_tag }}
+    env:
+      target_arch: "arm64"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Login to GitHub Container Registry
+      run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
+
+    - name: Add Telerik NuGet Package Source
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+    
+    - name: Restore NuGet Packages
+      run: dotnet restore ${{env.PROJECT_PATH}} -r "linux-${{env.target_arch}}"
+
+    - name: build the arm64 image
+      id: build
+      run: |
+        TAG="${{env.TAG_PREFIX}}-${{env.target_arch}}"
+        echo "build_tag=$TAG" >> $GITHUB_OUTPUT
+        dotnet publish ${{env.PROJECT_PATH}} -t:PublishContainer -p PublishProfile=DefaultContainer --arch ${{env.target_arch}} -p ContainerImageTag="$TAG" -p ContainerRepository=${{env.CONTAINER_REPOSITORY}} -p ContainerRegistry=${{env.CONTAINER_REGISTRY}} -p ContainerBaseImage=${{env.CONTAINER_BASE_IMAGE}} --no-restore
+      env:
+        TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
+
+  # Combine images into single manifest and push to this repo's Packages
+  # The .NET SDK doesn't support multi-arch container builds yet, so we build images separately and then combine them for publishing.
+  publish_combined_manifest:
+    runs-on: ubuntu-22.04
+    needs: [build_x64, build_arm64]
+    if: needs.build_x64.outputs.build_tag != '' && needs.build_arm64.outputs.build_tag != ''
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Login to GitHub Container Registry
+      run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
+
+    - name: create the multi-image manifest
+      run: |
+        docker manifest create "${{env.CONTAINER_REGISTRY}}/${{env.CONTAINER_REPOSITORY}}:latest" \
+          "${{env.CONTAINER_REGISTRY}}/${{env.CONTAINER_REPOSITORY}}:$X86_TAG" \
+          "${{env.CONTAINER_REGISTRY}}/${{env.CONTAINER_REPOSITORY}}:$ARM64_TAG"
+        
+        docker manifest push "${{env.CONTAINER_REGISTRY}}/${{env.CONTAINER_REPOSITORY}}:latest"
+      env:
+        X86_TAG: ${{needs.build_x64.outputs.build_tag}}
+        ARM64_TAG: ${{needs.build_arm64.outputs.build_tag}}
+
+
+
+  #########################################################
+  #                    WINDOWS BUILD                     #
+  #########################################################
+  build_windows:
+    runs-on: windows-2022
+    needs: [shared-resources]
+    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    env:
+      RID: win-x64
+      WEBAPP_PACKAGE_PATH: 'myapp'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Add Telerik NuGet Package Source
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+    
+    - name: Restore NuGet Packages
+      run: dotnet restore ${{env.PROJECT_PATH}} -r ${{env.RID}}
+
+    - name: Build Project
+      run: dotnet publish ${{env.PROJECT_PATH}} -c Release -r ${{env.RID}} --no-restore --property:PublishDir='${{env.WEBAPP_PACKAGE_PATH}}'
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: '${{env.TAG_PREFIX}}_net8.0-${{env.RID}}'
+        path: 'EnergyMonitor\EnergyMonitor\${{env.WEBAPP_PACKAGE_PATH}}'
+      env:
+        TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
