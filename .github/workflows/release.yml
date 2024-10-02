@@ -12,6 +12,7 @@ permissions:
   packages: write
 
 env:
+  AKEYLESS_ACCESS_ID: "p-fq3qbjjxv839"
   CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:8.0"
   CONTAINER_REGISTRY: "ghcr.io"
   CONTAINER_REPOSITORY: "edcharbeneau/powerproduction"
@@ -23,7 +24,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       tag_prefix: ${{steps.tag-creator.outputs.tag_prefix}}
-      telerik_nuget_key: ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}}
     steps:
     - name: Generate tag prefix
       id: tag-creator
@@ -31,15 +31,6 @@ jobs:
         buildDay=`date +%Y.%m.%d`
         tags="$buildDay.$GITHUB_RUN_NUMBER"
         echo "tag_prefix=$tags" >> $GITHUB_OUTPUT
-
-    - name: Fetch secrets from AKeyless
-      id: akeyless
-      uses: LanceMcCarthy/akeyless-action@v3
-      with:
-        access-id: "p-fq3qbjjxv839"
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
-        export-secrets-to-outputs: true
-        export-secrets-to-environment: false
 
 
   #######################################################################
@@ -50,9 +41,9 @@ jobs:
   build_x64:
     runs-on: ubuntu-22.04
     needs: [shared-resources]
-    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    if: needs.shared-resources.outputs.tag_prefix != ''
     outputs:
-      build_tag: ${{ steps.build.outputs.build_tag }}
+      build_tag: ${{steps.build.outputs.build_tag}}
     env:
       target_arch: "x64"
     steps:
@@ -64,8 +55,17 @@ jobs:
     - name: Login to GitHub Container Registry
       run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
 
+    - name: Fetch secrets from AKeyless
+      id: akeyless
+      uses: LanceMcCarthy/akeyless-action@v3
+      with:
+        access-id: ${{env.AKEYLESS_ACCESS_ID}}
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        export-secrets-to-outputs: true
+        export-secrets-to-environment: false
+
     - name: Add Telerik NuGet Package Source
-      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}} --store-password-in-clear-text
 
     - name: Restore NuGet Packages
       run: dotnet restore ${{env.PROJECT_PATH}} -r "linux-${{env.target_arch}}"
@@ -83,7 +83,7 @@ jobs:
   build_arm64:
     runs-on: ubuntu-22.04
     needs: [shared-resources]
-    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    if: needs.shared-resources.outputs.tag_prefix != ''
     permissions:
       contents: read
       packages: write
@@ -100,8 +100,17 @@ jobs:
     - name: Login to GitHub Container Registry
       run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
 
+    - name: Fetch secrets from AKeyless
+      id: akeyless
+      uses: LanceMcCarthy/akeyless-action@v3
+      with:
+        access-id: ${{env.AKEYLESS_ACCESS_ID}}
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        export-secrets-to-outputs: true
+        export-secrets-to-environment: false
+
     - name: Add Telerik NuGet Package Source
-      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}} --store-password-in-clear-text
     
     - name: Restore NuGet Packages
       run: dotnet restore ${{env.PROJECT_PATH}} -r "linux-${{env.target_arch}}"
@@ -149,7 +158,7 @@ jobs:
   build_windows:
     runs-on: windows-2022
     needs: [shared-resources]
-    if: needs.shared-resources.outputs.telerik_nuget_key != '' && needs.shared-resources.outputs.tag_prefix != ''
+    if: needs.shared-resources.outputs.tag_prefix != ''
     env:
       RID: win-x64
       WEBAPP_PACKAGE_PATH: 'myapp'
@@ -164,8 +173,17 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Fetch secrets from AKeyless
+      id: akeyless
+      uses: LanceMcCarthy/akeyless-action@v3
+      with:
+        access-id: ${{env.AKEYLESS_ACCESS_ID}}
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        export-secrets-to-outputs: true
+        export-secrets-to-environment: false
+
     - name: Add Telerik NuGet Package Source
-      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{needs.shared-resources.outputs.telerik_nuget_key}} --store-password-in-clear-text
+      run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}} --store-password-in-clear-text
     
     - name: Restore NuGet Packages
       run: dotnet restore ${{env.PROJECT_PATH}} -r ${{env.RID}}
@@ -176,6 +194,6 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: '${{env.TAG_PREFIX}}_net8.0-${{env.RID}}'
-        path: 'EnergyMonitor\EnergyMonitor\${{env.WEBAPP_PACKAGE_PATH}}'
+        path: 'BlazorSolarPowerHour\${{env.WEBAPP_PACKAGE_PATH}}'
       env:
         TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
