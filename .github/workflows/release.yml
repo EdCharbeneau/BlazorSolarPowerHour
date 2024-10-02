@@ -16,7 +16,7 @@ env:
   CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:8.0"
   CONTAINER_REGISTRY: "ghcr.io"
   CONTAINER_REPOSITORY: "edcharbeneau/powerproduction"
-  PROJECT_PATH: 'BlazorSolarPowerHour\BlazorSolarPowerHour.csproj'
+  PROJECT_PATH: 'BlazorSolarPowerHour/BlazorSolarPowerHour.csproj'
 
 jobs:
   # Creates a common version number using year.monthday.runnumber for all the builds to use (e.g., 2024.328.4 or 2024.1031.16)
