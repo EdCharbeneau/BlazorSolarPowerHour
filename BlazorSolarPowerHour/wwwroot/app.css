@@ -44,3 +44,8 @@
     position: sticky !important;
     flex: none !important;
 }
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

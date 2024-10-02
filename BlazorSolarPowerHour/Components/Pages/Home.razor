@@ -62,39 +62,7 @@
 
         <TileLayoutItem HeaderText="Battery">
             <Content>
-                <div>
-                    <TelerikArcGauge @ref="BatteryLevelPercentageGauge" Class="centered">
-                        <ArcGaugeCenterLabel>
-                            <Template>
-                                @(context.Pointers[0].Value)%
-                            </Template>
-                        </ArcGaugeCenterLabel>
-                        <ArcGaugeScales>
-                            <ArcGaugeScale Min="0" Max="100"/>
-                        </ArcGaugeScales>
-                        <ArcGaugePointers>
-                            <ArcGaugePointer Value="@batteryChargeValue"/>
-                        </ArcGaugePointers>
-                    </TelerikArcGauge>
-                </div>
-                <h3>Power Flow (Watts)</h3>
-                <div>
-                    <TelerikLinearGauge Transitions="false" @ref="BatteryLevelGauge">
-                        <LinearGaugeScales>
-                            <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
-                                <LinearGaugeScaleRanges>
-                                    <LinearGaugeScaleRange From="0" To="1000" Color="#00FF62"/>
-                                    <LinearGaugeScaleRange From="-250" To="0" Color="#FFE162"/>
-                                    <LinearGaugeScaleRange From="-700" To="-250" Color="#FF8400"/>
-                                    <LinearGaugeScaleRange From="-1000" To="-700" Color="#C20000"/>
-                                </LinearGaugeScaleRanges>
-                            </LinearGaugeScale>
-                        </LinearGaugeScales>
-                        <LinearGaugePointers>
-                            <LinearGaugePointer Value="@batteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
-                        </LinearGaugePointers>
-                    </TelerikLinearGauge>
-                </div>
+                <BatteryLiveGauges @ref=BatteryLiveGauges BatteryChargeValue="batteryChargeValue" BatteryPowerValue="batteryPowerValue" />
             </Content>
         </TileLayoutItem>
 
@@ -119,28 +87,28 @@
                 </TelerikStackLayout>
             </Content>
         </TileLayoutItem>
-        
+
         <TileLayoutItem HeaderText="Info">
             <Content>
                 <TelerikStackLayout Orientation="StackLayoutOrientation.Vertical" Spacing="1em">
                     <h3>Settings</h3>
                     <div>
-                        <CompactCard Value="@inverterMode" Text="Inverter Mode" Symbol="🎛️"/>
+                        <CompactCard Value="@inverterMode" Text="Inverter Mode" Symbol="🎛️" />
                     </div>
                     <div>
-                        <CompactCard Value="@chargerSourcePriority" Text="Charge Priority" Symbol="🎚️"/>
+                        <CompactCard Value="@chargerSourcePriority" Text="Charge Priority" Symbol="🎚️" />
                     </div>
                     <h3>Frequencies</h3>
                     <div>
-                        <CompactCard Value="@gridFrequency" Text="Grid" Unit="Hz" Symbol="📡"/>
+                        <CompactCard Value="@gridFrequency" Text="Grid" Unit="Hz" Symbol="📡" />
                     </div>
                     <div>
-                        <CompactCard Value="@outputFrequency" Text="Inverter Output" Unit="Hz" Symbol="📡"/>
+                        <CompactCard Value="@outputFrequency" Text="Inverter Output" Unit="Hz" Symbol="📡" />
                     </div>
                 </TelerikStackLayout>
             </Content>
         </TileLayoutItem>
-        
+
         <TileLayoutItem Class="chart-tile" RowSpan="1" ColSpan="2">
             <Content>
                 <TelerikChart @ref="@SystemPowerChartRef" Width="100%" Transitions="false" RenderAs="RenderingMode.Canvas">
@@ -232,11 +200,3 @@
         return context.value.toLocaleTimeString() + "\n" + context.value.toLocaleDateString();
     }
 </script>
-
-<style>
-    .centered {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-</style>

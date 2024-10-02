@@ -1,3 +1,4 @@
+using BlazorSolarPowerHour.Components.DashboardComponents;
 using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
 using CommonHelpers.Collections;
@@ -15,9 +16,8 @@ public partial class Home : IDisposable
     [Inject]
     Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
 
-    TelerikArcGauge? BatteryLevelPercentageGauge { get; set; }
+    BatteryLiveGauges? BatteryLiveGauges { get; set; }
     TelerikLinearGauge? BatteryPowerGauge { get; set; }
-    TelerikLinearGauge? BatteryLevelGauge { get; set; }
     TelerikTileLayout? TileLayoutInstance { get; set; }
     TelerikChart? SystemPowerChartRef { get; set; }
     TelerikChart? BatteryPercentageChartRef { get; set; }
@@ -36,14 +36,14 @@ public partial class Home : IDisposable
 
     readonly string localStorageKey = "tile-layout-state";
     string batteryPower = "";
-    double batteryPowerValue;
     string batteryCharge = "";
-    double batteryChargeValue;
     string pvPower = "";
     string gridPower = "";
     string loadPower = "";
     string inverterMode = "Solar/Battery/Grid";
     string chargerSourcePriority = "Solar";
+    double batteryChargeValue;
+    double batteryPowerValue;
 
     string batteryVoltage = "0";
     string backToBatteryVoltage = "0";
@@ -186,9 +186,8 @@ public partial class Home : IDisposable
 
     async Task ItemResize()
     {
-        BatteryLevelPercentageGauge?.Refresh();
+        BatteryLiveGauges?.Refresh();
         BatteryPowerGauge?.Refresh();
-        BatteryLevelGauge?.Refresh();
         await SaveState();
     }
 

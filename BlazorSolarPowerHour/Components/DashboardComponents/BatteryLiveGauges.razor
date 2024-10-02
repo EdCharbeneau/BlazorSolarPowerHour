@@ -1,0 +1,51 @@
+
+
+<div>
+    <TelerikArcGauge @ref="BatteryLevelPercentageGauge" Class="centered">
+        <ArcGaugeCenterLabel>
+            <Template>
+                @(context.Pointers[0].Value)%
+            </Template>
+        </ArcGaugeCenterLabel>
+        <ArcGaugeScales>
+            <ArcGaugeScale Min="0" Max="100" />
+        </ArcGaugeScales>
+        <ArcGaugePointers>
+            <ArcGaugePointer Value="@BatteryChargeValue" />
+        </ArcGaugePointers>
+    </TelerikArcGauge>
+</div>
+<h3>Power Flow (Watts)</h3>
+<div>
+    <TelerikLinearGauge Transitions="false" @ref="@BatteryLevelGauge">
+        <LinearGaugeScales>
+            <LinearGaugeScale Min="-1000" Max="1000" Vertical="false">
+                <LinearGaugeScaleRanges>
+                    <LinearGaugeScaleRange From="0" To="1000" Color="#00FF62" />
+                    <LinearGaugeScaleRange From="-250" To="0" Color="#FFE162" />
+                    <LinearGaugeScaleRange From="-700" To="-250" Color="#FF8400" />
+                    <LinearGaugeScaleRange From="-1000" To="-700" Color="#C20000" />
+                </LinearGaugeScaleRanges>
+            </LinearGaugeScale>
+        </LinearGaugeScales>
+        <LinearGaugePointers>
+            <LinearGaugePointer Value="@BatteryPowerValue" Shape="LinearGaugePointerShape.Arrow" Margin="10" Color="var(--kendo-color-on-app-surface)"></LinearGaugePointer>
+        </LinearGaugePointers>
+    </TelerikLinearGauge>
+</div>
+
+@code {
+    private TelerikArcGauge? BatteryLevelPercentageGauge { get; set; }
+    private TelerikLinearGauge? BatteryLevelGauge { get; set; }
+
+    [Parameter]
+    public double BatteryChargeValue { get; set; }
+    [Parameter]
+    public double BatteryPowerValue { get; set; }
+
+    public void Refresh()
+    {
+        BatteryLevelPercentageGauge?.Refresh();
+        BatteryLevelGauge?.Refresh();
+    }
+}
