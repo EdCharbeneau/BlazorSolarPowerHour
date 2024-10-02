@@ -7,7 +7,7 @@ on:
 # id-token/content - akeyless to prove this repo has permission to access Lance's secret
 # packages - to publish the docker image to the repo's packages registry
 permissions:
-  id-token: write 
+  id-token: write
   contents: read
   packages: write
 
@@ -84,9 +84,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [shared-resources]
     if: needs.shared-resources.outputs.tag_prefix != ''
-    permissions:
-      contents: read
-      packages: write
     outputs:
       build_tag: ${{ steps.build.outputs.build_tag }}
     env:
