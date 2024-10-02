@@ -2,6 +2,11 @@
 
 This is the source code for the project the Blazor Solar Power Hour team, [@EdCharbeneau](https://github.com/EdCharbeneau), [@LanceMcCarthy](https://github.com/LanceMcCarthy) and [@JustinR34](https://github.com/JustinR34), built over the summer of 2024 while streaming on [Twitch.tv/CodeItLive](https://www.twitch.tv/codeitlive).
 
+| Workflow | Status |
+|----------|--------|
+| main | [![Main](https://github.com/EdCharbeneau/BlazorSolarPowerHour/actions/workflows/master.yml/badge.svg)](https://github.com/EdCharbeneau/BlazorSolarPowerHour/actions/workflows/master.yml) |
+| release | [![Releases](https://github.com/EdCharbeneau/BlazorSolarPowerHour/actions/workflows/release.yml/badge.svg)](https://github.com/EdCharbeneau/BlazorSolarPowerHour/actions/workflows/release.yml) |
+
 ![image](https://github.com/user-attachments/assets/d4d9d634-d650-475c-9df5-8a439004cdc2)
 
 
