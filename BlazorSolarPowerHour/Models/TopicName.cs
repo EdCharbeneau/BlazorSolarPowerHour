@@ -21,6 +21,8 @@ public enum TopicName
     LoadPercentage_Inverter1,
     BatteryCurrent_Inverter1,
     GridPower_Inverter1,
+    PvVoltage_Inverter1,
+    PvCurrent_Inverter1,
     PvVoltage1_Inverter1,
     PvVoltage2_Inverter1,
     PvPower1_Inverter1,
@@ -45,6 +47,9 @@ public enum TopicName
     StateOfCharge_Battery1,
     Voltage_Battery1,
     Power_Battery1,
+    ExportToGrid_Inverter1,
+    SolarPowerPriority,
+    MaxDischargeCurrent_Inverter1,
     Unknown
 }
 

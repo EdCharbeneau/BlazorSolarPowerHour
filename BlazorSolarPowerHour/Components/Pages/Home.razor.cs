@@ -1,20 +1,26 @@
+using Blazored.LocalStorage;
 using BlazorSolarPowerHour.Components.DashboardComponents;
 using BlazorSolarPowerHour.Models;
 using BlazorSolarPowerHour.Services;
 using CommonHelpers.Collections;
 using Microsoft.AspNetCore.Components;
 using Telerik.Blazor.Components;
-using static BlazorSolarPowerHour.Models.MessageUtilities;
 
 namespace BlazorSolarPowerHour.Components.Pages;
 
 public partial class Home : IDisposable
 {
     [Inject]
-    public MessagesDbService DataService { get; set; } = default!;
+    MessagesDbService DataService { get; set; } = default!;
+    
+    [Inject]
+    MqttTopicUtilities MqttTopicUtilities { get; set; } = default!;
 
     [Inject]
-    Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
+    IConfiguration Config { get; set; } = default!;
+
+    [Inject]
+    ILocalStorageService LocalStorage { get; set; } = default!;
 
     BatteryLiveGauges? BatteryLiveGauges { get; set; }
     TelerikLinearGauge? BatteryPowerGauge { get; set; }
@@ -47,7 +53,10 @@ public partial class Home : IDisposable
 
     string batteryVoltage = "0";
     string backToBatteryVoltage = "0";
+    string pvVoltage = "0";
     string pv1Voltage = "0";
+    string pvCurrent = "0";
+    string pv1Current = "0";
     string busVoltage = "0";
     string outputVoltage = "0";
 
@@ -108,37 +117,52 @@ public partial class Home : IDisposable
 
     async Task GetValues()
     {
-        // Get the range of data based ont he dropdown selection (1,6,12, or 24 hours)
+        // Get the range of data based on the time range selection (1,6,12, or 24 hours)
         var items = await DataService.GetMeasurementsAsync(StartDateTime, EndDateTime);
 
+        // Get the individual topics from the data, separating topics by inverter model
 
-        // Get the individual topics from the data
-
-        loadPower = items.GetNewestValue(TopicName.LoadPower_Inverter1, "0");
-        pvPower = items.GetNewestValue(TopicName.PvPower_Inverter1, "0");
-        gridPower = items.GetNewestValue(TopicName.GridPower_Inverter1, "0");
-        batteryPower = items.GetNewestValue(TopicName.BatteryPower_Total, "0");
-        batteryCharge = items.GetNewestValue(TopicName.BatteryStateOfCharge_Total, "0");
-        inverterMode = items.GetNewestValue(TopicName.DeviceMode_Inverter1, "unknown");
-        chargerSourcePriority = items.GetNewestValue(TopicName.ChargerSourcePriority_Inverter1, "unknown");
+        loadPower = MqttTopicUtilities.GetNewestValue(items, TopicName.LoadPower_Inverter1, "0");
+        pvPower = MqttTopicUtilities.GetNewestValue(items, TopicName.PvPower_Inverter1, "0");
+        gridPower = MqttTopicUtilities.GetNewestValue(items, TopicName.GridPower_Inverter1, "0");
+        batteryPower = MqttTopicUtilities.GetNewestValue(items, TopicName.BatteryPower_Total, "0");
+        batteryCharge = MqttTopicUtilities.GetNewestValue(items, TopicName.BatteryStateOfCharge_Total, "0");
+        inverterMode = MqttTopicUtilities.GetNewestValue(items, TopicName.DeviceMode_Inverter1, "unknown");
+        chargerSourcePriority = MqttTopicUtilities.GetNewestValue(items, TopicName.ChargerSourcePriority_Inverter1, "unknown");
 
         batteryPowerValue = Convert.ToDouble(batteryPower);
         batteryChargeValue = Convert.ToDouble(batteryCharge);
 
-        gridFrequency = items.GetNewestValue(TopicName.GridFrequency_Inverter1, "0");
-        outputFrequency = items.GetNewestValue(TopicName.AcOutputFrequency_Inverter1, "0");
+        gridFrequency = MqttTopicUtilities.GetNewestValue(items, TopicName.GridFrequency_Inverter1, "0");
+        outputFrequency = MqttTopicUtilities.GetNewestValue(items, TopicName.AcOutputFrequency_Inverter1, "0");
 
-        outputVoltage = items.GetNewestValue(TopicName.AcOutputVoltage_Inverter1, "0");
-        batteryVoltage  = items.GetNewestValue(TopicName.BatteryVoltage_Inverter1, "0");
-        backToBatteryVoltage = items.GetNewestValue(TopicName.BackToBatteryVoltage_Inverter1, "0");
-        pv1Voltage = items.GetNewestValue(TopicName.PvVoltage1_Inverter1, "0");
-        busVoltage = items.GetNewestValue(TopicName.BusVoltage_Total, "0");
+        outputVoltage = MqttTopicUtilities.GetNewestValue(items, TopicName.AcOutputVoltage_Inverter1, "0");
+        batteryVoltage = MqttTopicUtilities.GetNewestValue(items, TopicName.BatteryVoltage_Inverter1, "0");
+        backToBatteryVoltage = MqttTopicUtilities.GetNewestValue(items, TopicName.BackToBatteryVoltage_Inverter1, "0");
+
+        busVoltage = MqttTopicUtilities.GetNewestValue(items, TopicName.BusVoltage_Total, "0");
+        
+
+        switch (Config["INVERTER_MANUFACTURER"]?.ToLower())
+        {
+            case "must":
+                // MUST only topics
+                pvVoltage = MqttTopicUtilities.GetNewestValue(items, TopicName.PvVoltage_Inverter1, "0");
+                pvCurrent = MqttTopicUtilities.GetNewestValue(items, TopicName.PvCurrent_Inverter1, "0");
+                break;
+            case "growatt":
+                // Growatt only topics
+                pv1Voltage = MqttTopicUtilities.GetNewestValue(items, TopicName.PvVoltage1_Inverter1, "0");
+                pv1Current = MqttTopicUtilities.GetNewestValue(items, TopicName.PvCurrent1_Inverter1, "0");
+                break;
+        }
+
 
         // Get some historical data for charts
-
         foreach (var item in items)
         {
-            var topicName = GetTopicName(item.Topic ?? "");
+            var topicName = MqttTopicUtilities.GetTopicName(item.Topic ?? "");
+
             switch (topicName)
             {
                 case TopicName.LoadPower_Inverter1:

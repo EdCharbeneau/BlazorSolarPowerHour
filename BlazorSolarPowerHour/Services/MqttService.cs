@@ -1,17 +1,19 @@
-﻿using BlazorSolarPowerHour.Models;
+﻿using System.Diagnostics;
+using BlazorSolarPowerHour.Models;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Packets;
 
 namespace BlazorSolarPowerHour.Services;
 
-public class MqttService(IConfiguration config, IServiceProvider serviceProvider) : BackgroundService, IAsyncDisposable
+public class MqttService(IConfiguration config, IServiceProvider serviceProvider, MqttTopicUtilities utils) : BackgroundService, IAsyncDisposable
 {
     // Service setup
     private MqttFactory? mqttFactory;
     private IMqttClient? mqttClient;
     private readonly string mqttHost = config["MQTT_HOST"] ?? throw new NullReferenceException("A value for the MQTT_HOST environment variable must be set before starting the application.");
     private readonly string mqttPort = config["MQTT_PORT"] ?? string.Empty;
+    private readonly string mqttTopicPrefix = config["MQTT_TOPIC_PREFIX"] ?? "solar_assistant";
 
     // External acknowledgement of live connection
     public bool IsSubscribedToTopic { get; set; }
@@ -40,7 +42,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
         // start listening for messages
         await mqttClient.SubscribeAsync(
             mqttFactory?.CreateSubscribeOptionsBuilder()
-                .WithTopicFilter(f => { f.WithTopic("solar_assistant/#"); })
+                .WithTopicFilter(f => { f.WithTopic($"{mqttTopicPrefix}/#"); })
                 .Build(),
             CancellationToken.None);
 
@@ -51,7 +53,9 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
     // This is called every time a new message comes in (once for each topic)
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
-        // Get the value from the payload
+        Debug.WriteLine(e.ApplicationMessage.Topic);
+
+        // Get the value from the payload, using DataUtilities
         var decodedPayload = e.ApplicationMessage.PayloadSegment.GetTopicValue();
 
         // Important: Create a temporary scope in order to access the DbService and add the item.
@@ -73,7 +77,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
         {
             // Unsubscribe, be nice to the broker
             var options = mqttFactory?.CreateUnsubscribeOptionsBuilder()
-                .WithTopicFilter(new MqttTopicFilter { Topic = "solar_assistant/#" })
+                .WithTopicFilter(new MqttTopicFilter { Topic = $"{mqttTopicPrefix}/#" })
                 .Build();
 
             await mqttClient!.UnsubscribeAsync(options, CancellationToken.None);

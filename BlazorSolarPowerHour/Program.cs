@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<MeasurementsDbContext>(o => 
 {
-    o.UseSqlite("Data Source=Measurements.db", b => b.MigrationsAssembly("BlazorSolarPowerHour")); 
+    o.UseSqlite("Data Source=NewMeasurements.db", b => b.MigrationsAssembly("BlazorSolarPowerHour")); 
 });
 
 // Add services to the container.
@@ -17,8 +17,11 @@ builder.Services.AddRazorComponents()
 builder.Services.AddTelerikBlazor();
 builder.Services.AddBlazoredLocalStorage();
 
-// Setup the database service as a normal scoped service
+// Set up the database service as a normal scoped service
 builder.Services.AddScoped<MessagesDbService>();
+
+// Helper class that supports multiple inverter manufacturers
+builder.Services.AddSingleton<MqttTopicUtilities>();
 
 // Using MqttService as a background service https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services
 builder.Services.AddSingleton<MqttService>();
@@ -37,19 +40,16 @@ using (var serviceScope = app.Services.CreateScope())
     {
         await dbContext.Database.MigrateAsync();
     }
-    
 }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 

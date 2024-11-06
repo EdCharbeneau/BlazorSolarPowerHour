@@ -5,6 +5,7 @@ using Telerik.Blazor.Components;
 using Telerik.DataSource;
 
 namespace BlazorSolarPowerHour.Components.Pages;
+
 public partial class History
 {
     [Inject]
@@ -74,7 +75,7 @@ public partial class History
                 // assign new TransactionDate filters
                 state.FilterDescriptors.Add(StartFilter());
                 state.FilterDescriptors.Add(EndFilter());
-                await Grid?.SetStateAsync(state);
+                await Grid?.SetStateAsync(state)!;
             }
         }
     }

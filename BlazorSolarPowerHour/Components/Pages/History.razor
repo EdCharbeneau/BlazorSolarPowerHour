@@ -1,7 +1,6 @@
 ﻿@page "/history"
-@using CommonHelpers.Collections
 @using System.Text.RegularExpressions
-@using Telerik.DataSource
+@inject MqttTopicUtilities MqttTopicUtilities
 
 <h3>History</h3>
 
@@ -28,7 +27,7 @@
             <Template>
                 @{
                     var mqttItem = context as MqttDataItem;
-                    var topic = MessageUtilities.GetTopicName(mqttItem?.Topic ?? "");
+                    var topic = MqttTopicUtilities.GetTopicName(mqttItem?.Topic ?? "");
                     @Regex.Replace(topic.ToString().Replace("_", ""), "(\\B[A-Z])", " $1")
                 }
             </Template>
