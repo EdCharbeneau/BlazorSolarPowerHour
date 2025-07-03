@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 namespace BlazorSolarPowerHour.Models;
 
@@ -7,7 +8,7 @@ namespace BlazorSolarPowerHour.Models;
         public static string GetNewestValue(this List<MqttDataItem> items, TopicName topic, string defaultValue) 
             => items.Where(d => d.Topic == GetTopic(topic)).OrderByDescending(d => d.Timestamp).FirstOrDefault()?.Value ?? defaultValue;
 
-        public static string GetTopicValue(this ArraySegment<byte> bytes) 
+        public static string GetTopicValue(this ReadOnlySequence<byte> bytes) 
             => Encoding.ASCII.GetString(bytes.ToArray());
 
         public static TopicName GetTopicName(string topic)

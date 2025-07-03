@@ -1,6 +1,5 @@
 ﻿using BlazorSolarPowerHour.Models;
 using MQTTnet;
-using MQTTnet.Client;
 using MQTTnet.Packets;
 
 namespace BlazorSolarPowerHour.Services;
@@ -8,7 +7,7 @@ namespace BlazorSolarPowerHour.Services;
 public class MqttService(IConfiguration config, IServiceProvider serviceProvider) : BackgroundService, IAsyncDisposable
 {
     // Service setup
-    private MqttFactory? mqttFactory;
+    private MqttClientFactory? mqttFactory;
     private IMqttClient? mqttClient;
     private readonly string mqttHost = config["MQTT_HOST"] ?? throw new NullReferenceException("A value for the MQTT_HOST environment variable must be set before starting the application.");
     private readonly string mqttPort = config["MQTT_PORT"] ?? string.Empty;
@@ -23,7 +22,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
     // This is required in order to get the scoped DbService in a BackgroundService (we cannot inject it in the CTOR because it is scoped)
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this.mqttFactory = new MqttFactory();
+        this.mqttFactory = new MqttClientFactory();
         this.mqttClient = mqttFactory?.CreateMqttClient();
 
         if (mqttClient == null)
@@ -52,7 +51,7 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
     private async Task GotMessage(MqttApplicationMessageReceivedEventArgs e)
     {
         // Get the value from the payload
-        var decodedPayload = e.ApplicationMessage.PayloadSegment.GetTopicValue();
+        var decodedPayload = e.ApplicationMessage.Payload.GetTopicValue();
 
         // Important: Create a temporary scope in order to access the DbService and add the item.
         using var scope = serviceProvider.CreateScope();
