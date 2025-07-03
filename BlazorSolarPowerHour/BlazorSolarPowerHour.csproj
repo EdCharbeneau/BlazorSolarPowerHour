@@ -8,15 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Models\NewFile.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-    <PackageReference Include="CommonHelpers" Version="1.3.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
-    <PackageReference Include="MQTTnet" Version="4.3.6.1152" />
-    <PackageReference Include="Telerik.UI.for.Blazor" Version="6.2.0" />
+    <PackageReference Include="CommonHelpers" Version="1.5.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
+    <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
+    <PackageReference Include="Telerik.UI.for.Blazor" Version="9.1.0" />
   </ItemGroup>
 
 </Project>
