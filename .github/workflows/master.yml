@@ -38,7 +38,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v3
       with:
         access-id: "p-fq3qbjjxv839"
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -50,3 +50,5 @@ jobs:
 
     - name: Build Project
       run: dotnet build ${{env.PROJECT_PATH}} -c Debug -r ${{env.RID}} --no-restore
+      env:
+        TELERIK_LICENSE: ${{steps.akeyless.outputs.LICENSE_KEY}}

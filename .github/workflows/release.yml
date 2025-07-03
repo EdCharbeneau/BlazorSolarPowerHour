@@ -60,7 +60,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v3
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -78,6 +78,7 @@ jobs:
         dotnet publish ${{env.PROJECT_PATH}} -t:PublishContainer -p PublishProfile=DefaultContainer --arch ${{env.target_arch}} -p ContainerImageTag="$TAG" -p ContainerRepository=${{env.CONTAINER_REPOSITORY}} -p ContainerRegistry=${{env.CONTAINER_REGISTRY}} -p ContainerBaseImage=${{env.CONTAINER_BASE_IMAGE}} --no-restore
       env:
         TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
+        TELERIK_LICENSE: ${{steps.akeyless.outputs.LICENSE_KEY}}
 
   # Build an linux-arm64 image
   build_arm64:
@@ -102,7 +103,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v3
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -120,6 +121,7 @@ jobs:
         dotnet publish ${{env.PROJECT_PATH}} -t:PublishContainer -p PublishProfile=DefaultContainer --arch ${{env.target_arch}} -p ContainerImageTag="$TAG" -p ContainerRepository=${{env.CONTAINER_REPOSITORY}} -p ContainerRegistry=${{env.CONTAINER_REGISTRY}} -p ContainerBaseImage=${{env.CONTAINER_BASE_IMAGE}} --no-restore
       env:
         TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
+        TELERIK_LICENSE: ${{steps.akeyless.outputs.LICENSE_KEY}}
 
   # Combine images into single manifest and push to this repo's Packages
   # The .NET SDK doesn't support multi-arch container builds yet, so we build images separately and then combine them for publishing.
@@ -175,7 +177,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v3
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY"}'
+        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -194,3 +196,4 @@ jobs:
         path: 'BlazorSolarPowerHour\${{env.WEBAPP_PACKAGE_PATH}}'
       env:
         TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
+        TELERIK_LICENSE: ${{steps.akeyless.outputs.LICENSE_KEY}}
