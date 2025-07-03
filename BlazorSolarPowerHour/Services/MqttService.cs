@@ -34,6 +34,10 @@ public class MqttService(IConfiguration config, IServiceProvider serviceProvider
         // Connect to the MQTT server
         var port = int.TryParse(mqttPort, out var portNumber) ? portNumber : 1883;
         var clientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttHost, port).Build();
+
+        // TODO - Lance
+        //clientOptions.Credentials = new MqttClientCredentials("", System.Text.Encoding.UTF8.GetBytes(""));
+
         await mqttClient!.ConnectAsync(clientOptions, CancellationToken.None);
 
         // start listening for messages
