@@ -9,33 +9,29 @@ on:
       - 'BlazorSolarPowerHour/**/*'
       - '.github/workflows/master.yml'
 
-# Needed for:
-# id-token/content - akeyless to prove this repo has permission to access Lance's secret
 permissions:
-  id-token: write
+  id-token: write # OIDC token permissions for AKeyless
   contents: read
 
 env:
   PROJECT_PATH: 'BlazorSolarPowerHour\BlazorSolarPowerHour.csproj'
-  RID: win-x64
+  DOTNETVER: '10.0.*'
 
 jobs:
   build_windows: # quick debug build on Windows, no publishing (see releases.yml for deployments)
     runs-on: windows-2022
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNETVER}}
 
     - name: Fetch secrets from AKeyless
       id: akeyless
-      uses: LanceMcCarthy/akeyless-action@v3
+      uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: "p-fq3qbjjxv839"
         static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
@@ -46,9 +42,9 @@ jobs:
       run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}} --store-password-in-clear-text
     
     - name: Restore NuGet Packages
-      run: dotnet restore ${{env.PROJECT_PATH}} -r ${{env.RID}}
+      run: dotnet restore ${{env.PROJECT_PATH}} -c Release
 
     - name: Build Project
-      run: dotnet build ${{env.PROJECT_PATH}} -c Debug -r ${{env.RID}} --no-restore
+      run: dotnet build ${{env.PROJECT_PATH}} -c Release --no-restore
       env:
         TELERIK_LICENSE: ${{steps.akeyless.outputs.LICENSE_KEY}}

@@ -3,25 +3,23 @@ name: Releases
 on:
   workflow_dispatch:
 
-# Needed for:
-# id-token/content - akeyless to prove this repo has permission to access Lance's secret
-# packages - to publish the docker image to the repo's packages registry
 permissions:
-  id-token: write
+  id-token: write # OIDC token permissions for AKeyless
   contents: read
-  packages: write
+  packages: write # publish the docker image to the repo's packages registry
 
 env:
   AKEYLESS_ACCESS_ID: "p-fq3qbjjxv839"
-  CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:8.0"
+  CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:10.0"
   CONTAINER_REGISTRY: "ghcr.io"
   CONTAINER_REPOSITORY: "edcharbeneau/powerproduction"
   PROJECT_PATH: 'BlazorSolarPowerHour/BlazorSolarPowerHour.csproj'
+  DOTNETVER: '10.0.*'
 
 jobs:
   # Creates a common version number using year.monthday.runnumber for all the builds to use (e.g., 2024.328.4 or 2024.1031.16)
   shared-resources:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       tag_prefix: ${{steps.tag-creator.outputs.tag_prefix}}
     steps:
@@ -39,7 +37,7 @@ jobs:
   
   # Build an x64 image
   build_x64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: [shared-resources]
     if: needs.shared-resources.outputs.tag_prefix != ''
     outputs:
@@ -48,16 +46,14 @@ jobs:
       target_arch: "x64"
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: Login to GitHub Container Registry
       run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
 
     - name: Fetch secrets from AKeyless
       id: akeyless
-      uses: LanceMcCarthy/akeyless-action@v3
+      uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
         static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
@@ -82,7 +78,7 @@ jobs:
 
   # Build an linux-arm64 image
   build_arm64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: [shared-resources]
     if: needs.shared-resources.outputs.tag_prefix != ''
     outputs:
@@ -91,16 +87,14 @@ jobs:
       target_arch: "arm64"
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: Login to GitHub Container Registry
       run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
 
     - name: Fetch secrets from AKeyless
       id: akeyless
-      uses: LanceMcCarthy/akeyless-action@v3
+      uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
         static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
@@ -126,14 +120,12 @@ jobs:
   # Combine images into single manifest and push to this repo's Packages
   # The .NET SDK doesn't support multi-arch container builds yet, so we build images separately and then combine them for publishing.
   publish_combined_manifest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: [build_x64, build_arm64]
     if: needs.build_x64.outputs.build_tag != '' && needs.build_arm64.outputs.build_tag != ''
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: Login to GitHub Container Registry
       run: docker login ${{env.CONTAINER_REGISTRY}} -u ${{github.actor}} -p ${{secrets.GITHUB_TOKEN}}
@@ -155,7 +147,7 @@ jobs:
   #                    WINDOWS BUILD                     #
   #########################################################
   build_windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     needs: [shared-resources]
     if: needs.shared-resources.outputs.tag_prefix != ''
     env:
@@ -163,18 +155,16 @@ jobs:
       WEBAPP_PACKAGE_PATH: 'myapp'
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNETVER}}
 
     - name: Fetch secrets from AKeyless
       id: akeyless
-      uses: LanceMcCarthy/akeyless-action@v3
+      uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
         static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
@@ -190,9 +180,9 @@ jobs:
     - name: Build Project
       run: dotnet publish ${{env.PROJECT_PATH}} -c Release -r ${{env.RID}} --no-restore --property:PublishDir='${{env.WEBAPP_PACKAGE_PATH}}'
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
-        name: '${{env.TAG_PREFIX}}_net8.0-${{env.RID}}'
+        name: '${{env.TAG_PREFIX}}_net10.0-${{env.RID}}'
         path: 'BlazorSolarPowerHour\${{env.WEBAPP_PACKAGE_PATH}}'
       env:
         TAG_PREFIX: ${{needs.shared-resources.outputs.tag_prefix}}
