@@ -9,7 +9,7 @@ permissions:
   packages: write # publish the docker image to the repo's packages registry
 
 env:
-  AKEYLESS_ACCESS_ID: "p-fq3qbjjxv839"
+  AKEYLESS_ACCESS_ID: "p-4blpeo5zdfeaom"
   CONTAINER_BASE_IMAGE: "mcr.microsoft.com/dotnet/aspnet:10.0"
   CONTAINER_REGISTRY: "ghcr.io"
   CONTAINER_REPOSITORY: "edcharbeneau/powerproduction"
@@ -56,7 +56,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
+        static-secrets: '{"/progress/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/progress/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -97,7 +97,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
+        static-secrets: '{"/progress/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/progress/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
@@ -167,7 +167,7 @@ jobs:
       uses: LanceMcCarthy/akeyless-action@v5
       with:
         access-id: ${{env.AKEYLESS_ACCESS_ID}}
-        static-secrets: '{"/personal-keys/mccarthy/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/personal-keys/mccarthy/TELERIK_LICENSE":"LICENSE_KEY"}'
+        static-secrets: '{"/progress/TELERIK_NUGET_KEY":"TELERIK_NUGET_KEY", "/progress/TELERIK_LICENSE":"LICENSE_KEY"}'
         export-secrets-to-outputs: true
         export-secrets-to-environment: false
 
