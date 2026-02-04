@@ -52,9 +52,9 @@ public class MessagesDbService(MeasurementsDbContext dbContext)
     {
         var originalItem = await dbContext.FindAsync<MqttDataItem>(item.Id);
 
-        if(originalItem == null)
+        if(originalItem != null)
         {
-            dbContext.Remove(item);
+            dbContext.Remove(originalItem);
 
             await dbContext.SaveChangesAsync();
         }
