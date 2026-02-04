@@ -8,12 +8,11 @@ namespace BlazorSolarPowerHour.Components.Pages;
 public partial class History
 {
     [Inject]
-    public MessagesDbService DataService { get; set; } = default!;
+    public MessagesDbService DataService { get; set; } = null!;
 
     //private ObservableRangeCollection<MqttDataItem> Data { get; } = new();
-    TelerikGrid<MqttDataItem>? Grid { get; set; }
 
-    private List<MqttDataItem> Data;
+    private TelerikGrid<MqttDataItem>? Grid { get; set; }
 
     public DateTime StartDate { get; set; } = DateTime.Now.AddDays(-1);
     public DateTime EndDate { get; set; } = DateTime.Now;
@@ -21,8 +20,8 @@ public partial class History
 
     // StartDate > dateChosen 
     // EndDate < dateChosen
-    FilterDescriptor StartFilter() => new FilterDescriptor(nameof(MqttDataItem.Timestamp), FilterOperator.IsGreaterThan, StartDate);
-    FilterDescriptor EndFilter() => new FilterDescriptor(nameof(MqttDataItem.Timestamp), FilterOperator.IsLessThan, EndDate);
+    private FilterDescriptor StartFilter() => new(nameof(MqttDataItem.Timestamp), FilterOperator.IsGreaterThan, StartDate);
+    private FilterDescriptor EndFilter() => new(nameof(MqttDataItem.Timestamp), FilterOperator.IsLessThan, EndDate);
 
     // private async void OnStartDateChange(object obj)
     // {
@@ -36,7 +35,7 @@ public partial class History
 
     private async Task OnRead(GridReadEventArgs args)
     {
-        DataSourceResult result = await DataService.GetMeasurementsRequestAsync(StartDate, EndDate, args.Request);
+        var result = await DataService.GetMeasurementsRequestAsync(StartDate, EndDate, args.Request);
         args.Data = result.Data;
         args.Total = result.Total;
     }
@@ -47,7 +46,7 @@ public partial class History
     //     Data.AddRange(await DataService.GetMeasurementsAsync(StartDate, EndDate));
     // }
 
-    void StartValueChangedHandler(DateTime currStart)
+    private void StartValueChangedHandler(DateTime currStart)
     {
         //you have to update the model manually because handling the <Parameter>Changed event does not let you use @bind-<Parameter>
         //not updating the model will effectively cancel the event
@@ -56,7 +55,7 @@ public partial class History
         //Console.WriteLine($"start changed to: {currStart}");
     }
 
-    async Task EndValueChangedHandler(DateTime currEnd)
+    private async Task EndValueChangedHandler(DateTime currEnd)
     {
         // you have to update the model manually because handling the <Parameter>Changed event does not let you use @bind-<Parameter>
         // not updating the model will effectively cancel the event
@@ -66,15 +65,18 @@ public partial class History
         // if this does not pass, the user has only clicked once in the calendar popup
         if (currEnd != default(DateTime))
         {
-            var state = Grid?.GetState();
-            if (state is not null)
+            if (Grid is not null)
             {
-                // clear TransactionDate filters
-                state.FilterDescriptors = state.FilterDescriptors.Where(f => (f as FilterDescriptor)?.Member != nameof(MqttDataItem.Timestamp)).ToList();
-                // assign new TransactionDate filters
-                state.FilterDescriptors.Add(StartFilter());
-                state.FilterDescriptors.Add(EndFilter());
-                await Grid?.SetStateAsync(state);
+                var state = Grid.GetState();
+                if (state is not null)
+                {
+                    // clear TransactionDate filters
+                    state.FilterDescriptors = state.FilterDescriptors.Where(f => (f as FilterDescriptor)?.Member != nameof(MqttDataItem.Timestamp)).ToList();
+                    // assign new TransactionDate filters
+                    state.FilterDescriptors.Add(StartFilter());
+                    state.FilterDescriptors.Add(EndFilter());
+                    await Grid.SetStateAsync(state);
+                }
             }
         }
     }
