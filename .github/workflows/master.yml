@@ -48,7 +48,7 @@ jobs:
       run: dotnet nuget add source 'https://nuget.telerik.com/v3/index.json' -n "TelerikNuGetServer" -u "api-key" -p ${{steps.akeyless.outputs.TELERIK_NUGET_KEY}} --store-password-in-clear-text
     
     - name: Restore NuGet Packages
-      run: dotnet restore ${{env.PROJECT_PATH}} -c Release
+      run: dotnet restore ${{env.PROJECT_PATH}}
 
     - name: Build Project
       run: dotnet build ${{env.PROJECT_PATH}} -c Release --no-restore
